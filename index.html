@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McKinsey Analytics Dashboard - Team Wavy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <style>
+        :root {
+            /* McKinsey Professional Color Palette */
+            --mckinsey-navy: #003366;
+            --mckinsey-blue: #0066CC;
+            --mckinsey-light-blue: #4A90E2;
+            --mckinsey-gold: #FFB800;
+            --mckinsey-light-gold: #FFC933;
+            --mckinsey-gray: #6C757D;
+            --mckinsey-light-gray: #F8F9FA;
+            --mckinsey-dark-gray: #343A40;
+            
+            /* Light Theme */
+            --primary-color: var(--mckinsey-navy);
+            --secondary-color: var(--mckinsey-blue);
+            --accent-color: var(--mckinsey-gold);
+            --success-color: #28A745;
+            --warning-color: #FFC107;
+            --danger-color: #DC3545;
+            --info-color: var(--mckinsey-light-blue);
+            
+            --bg-primary: #FFFFFF;
+            --bg-secondary: var(--mckinsey-light-gray);
+            --bg-card: #FFFFFF;
+            --bg-sidebar: var(--mckinsey-navy);
+            
+            --text-primary: var(--mckinsey-dark-gray);
+            --text-secondary: var(--mckinsey-gray);
+            --text-light: #FFFFFF;
+            --text-muted: #6C757D;
+            
+            --border-color: #E9ECEF;
+            --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.15);
+            
+            --border-radius: 8px;
+            --border-radius-lg: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme for Professional Evening Presentations */
+            --bg-primary: #1A1D23;
+            --bg-secondary: #2C3E50;
+            --bg-card: #34495E;
+            --bg-sidebar: #2C3E50;
+            
+            --text-primary: #FFFFFF;
+            --text-secondary: #BDC3C7;
+            --text-light: #FFFFFF;
+            --text-muted: #95A5A6;
+            
+            --border-color: #34495E;
+            --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.2);
+            --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        /* Professional Header */
+        .dashboard-header {
+            background: var(--bg-card);
+            border-bottom: 2px solid var(--border-color);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-light);
+        }
+
+        .mckinsey-logo {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .mckinsey-logo::before {
+            content: '';
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dashboard-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .dashboard-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 400;
+            margin: 0;
+        }
+
+        .team-badge {
+            background: linear-gradient(135deg, var(--accent-color), var(--mckinsey-light-gold));
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Theme Toggle - Professional Style */
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: var(--border-color);
+            border-radius: 15px;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        [data-theme="dark"] .theme-toggle::before {
+            transform: translateX(28px);
+            background: var(--accent-color);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--secondary-color);
+        }
+
+        /* Professional Card Design */
+        .dashboard-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-heavy);
+            border-color: var(--secondary-color);
+        }
+
+        .card-header-professional {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-light);
+            border: none;
+            padding: 1.5rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header-professional .badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+        }
+
+        /* KPI Metrics - McKinsey Style */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-lg);
+            border-left: 4px solid var(--secondary-color);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(0, 102, 204, 0.05));
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .kpi-card:hover::before {
+            opacity: 1;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            border-left-color: var(--accent-color);
+        }
+
+        .kpi-value {
+            font-family: 'Inter', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .kpi-label {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .kpi-trend {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            z-index: 1;
+        }
+
+        .trend-up { color: var(--success-color); }
+        .trend-down { color: var(--danger-color); }
+        .trend-stable { color: var(--warning-color); }
+
+        /* Chart Containers */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            padding: 2rem;
+        }
+
+        .chart-container-large {
+            height: 450px;
+        }
+
+        /* Business Insights Panel */
+        .insights-panel {
+            background: linear-gradient(135deg, var(--mckinsey-light-gray), #FFFFFF);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            margin: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .insights-panel {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary));
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            border-left: 3px solid var(--info-color);
+            transition: var(--transition);
+        }
+
+        .insight-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .insight-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--info-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .insight-content h6 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .insight-content p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Professional Buttons */
+        .btn-professional {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: var(--text-light);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+
+        .btn-professional:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: var(--text-light);
+        }
+
+        .btn-outline-professional {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+
+        .btn-outline-professional:hover {
+            background: var(--primary-color);
+            color: var(--text-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* Professional Table */
+        .table-professional {
+            background: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .table-professional th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-light);
+            border: none;
+            padding: 1.25rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        .table-professional td {
+            padding: 1.25rem;
+            border-color: var(--border-color);
+            vertical-align: middle;
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .table-professional tbody tr:hover {
+            background: rgba(0, 102, 204, 0.05);
+            transform: scale(1.01);
+        }
+
+        /* Rating Display */
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rating-stars {
+            color: var(--accent-color);
+            font-size: 1.1rem;
+        }
+
+        .rating-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-excellent {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .status-good {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning-color);
+            border: 1px solid rgba(255, 193, 7, 0.2);
+        }
+
+        .status-poor {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+
+        /* Filter Controls */
+        .filter-section {
+            background: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .filter-section .form-control,
+        .filter-section .form-select {
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            transition: var(--transition);
+            padding: 0.75rem 1rem;
+        }
+
+        .filter-section .form-control:focus,
+        .filter-section .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+        }
+
+        /* McKinsey-style Progress Bars */
+        .progress-professional {
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar-professional {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--info-color));
+            border-radius: 4px;
+            transition: width 1s ease-in-out;
+            position: relative;
+        }
+
+        /* Comparison Panel */
+        .comparison-panel {
+            background: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            margin: 1rem;
+            border: 1px solid var(--border-color);
+            transform: scale(0.95);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .comparison-panel.active {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        /* Loading States */
+        .loading-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--secondary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-title {
+                font-size: 1.5rem;
+            }
+            
+            .kpi-value {
+                font-size: 2rem;
+            }
+            
+            .chart-container {
+                height: 300px;
+                padding: 1rem;
+            }
+            
+            .kpi-container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+        }
+
+        /* Professional Animations */
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        /* Toast Notifications */
+        .toast-professional {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            color: var(--text-primary);
+        }
+
+        /* Executive Summary Section */
+        .executive-summary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-light);
+            padding: 3rem 2rem;
+            border-radius: var(--border-radius-lg);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .executive-summary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .executive-summary h2 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .executive-summary p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <!-- Professional Header -->
+    <header class="dashboard-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-3">
+                    <a href="#" class="mckinsey-logo">
+                        McKinsey Analytics
+                    </a>
+                </div>
+                <div class="col-md-6 text-center">
+                    <h1 class="dashboard-title">Product Intelligence Dashboard</h1>
+                    <p class="dashboard-subtitle">Strategic Insights for Market Leadership</p>
+                </div>
+                <div class="col-md-3 text-end">
+                    <div class="d-flex align-items-center justify-content-end gap-3">
+                        <span class="team-badge">
+                            <i class="fas fa-wave-square me-1"></i>
+                            Team Wavy
+                        </span>
+                        <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme"></div>
+                        <button class="btn btn-professional">
+                            <i class="fas fa-download me-2"></i>Export Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <div class="container-fluid py-4">
+        <!-- Executive Summary -->
+        <div class="row">
+            <div class="col-12">
+                <div class="executive-summary">
+                    <h2><i class="fas fa-chart-line me-3"></i>Executive Summary</h2>
+                    <p>Comprehensive analysis of product performance metrics across 15,247 customer reviews, revealing key insights for strategic decision-making and market positioning optimization.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Metrics -->
+        <div class="row">
+            <div class="col-12">
+                <div class="dashboard-card">
+                    <div class="card-header-professional">
+                        <span><i class="fas fa-tachometer-alt me-2"></i>Key Performance Indicators</span>
+                        <span class="badge">Real-time</span>
+                    </div>
+                    <div class="kpi-container">
+                        <div class="kpi-card" onclick="showInsight('rating')">
+                            <div class="kpi-trend trend-up">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                            <div class="kpi-value" id="avgRating">4.2</div>
+                            <div class="kpi-label">Average Customer Rating</div>
+                        </div>
+                        <div class="kpi-card" onclick="showInsight('sentiment')">
+                            <div class="kpi-trend trend-up">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                            <div class="kpi-value" id="sentimentScore">75%</div>
+                            <div class="kpi-label">Positive Sentiment</div>
+                        </div>
+                        <div class="kpi-card" onclick="showInsight('price')">
+                            <div class="kpi-trend trend-stable">
+                                <i class="fas fa-minus"></i>
+                            </div>
+                            <div class="kpi-value" id="priceRange">$199-$899</div>
+                            <div class="kpi-label">Price Range</div>
+                        </div>
+                        <div class="kpi-card" onclick="showInsight('reviews')">
+                            <div class="kpi-trend trend-up">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                            <div class="kpi-value" id="totalReviews">15,247</div>
+                            <div class="kpi-label">Total Reviews Analyzed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Market Trend Analysis -->
+            <div class="col-lg-8">
+                <div class="dashboard-card">
+                    <div class="card-header-professional">
+                        <span><i class="fas fa-chart-area me-2"></i>Market Trend Analysis</span>
+                        <span class="badge">12-Month View</span>
+                    </div>
+                    <div class="chart-container chart-container-large">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strategic Insights -->
+            <div class="col-lg-4">
+                <div class="dashboard-card">
+                    <div class="card-header-professional">
+                        <span><i class="fas fa-lightbulb me-2"></i>Strategic Insights</span>
+                    </div>
+                    <div class="insights-panel">
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-battery-full"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h6>Battery Performance</h6>
+                                <p>85% satisfaction rate - Key differentiator</p>
+                                <div class="progress-professional">
+                                    <div class="progress-bar-professional" style="width: 85%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-palette"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h6>Design Excellence</h6>
+                                <p>92% approval - Premium positioning</p>
+                                <div class="progress-professional">
+                                    <div class="progress-bar-professional" style="width: 92%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h6>Value Proposition</h6>
+                                <p>78% value perception - Optimization needed</p>
+                                <div class="progress-professional">
+                                    <div class="progress-bar-professional" style="width: 78%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h6>Durability Index</h6>
+                                <p>88% reliability score - Competitive advantage</p>
+                                <div class="progress-professional">
+                                    <div class="progress-bar-professional" style="width: 88%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Value-Price Matrix -->
+            <div class="col-lg-6">
+                <div class="dashboard-card">
+                    <div class="card-header-professional">
+                        <span><i class="fas fa-chart-scatter me-2"></i>Value-Price Matrix</span>
+                        <span class="badge">Portfolio Analysis</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="scatterChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Competitive Benchmarking -->
+            <div class="col-lg-6">
+                <div class="dashboard-card">
+                    <div class="card-header-professional">
+                        <span><i class="fas fa-balance-scale me-2"></i>Competitive Benchmarking</span>
+                    </div>
+                    <div class="p-3">
+                        <button class="btn btn-outline-professional mb-3" onclick="toggleComparison()">
+                            <i class="fas fa-plus me-2"></i>
+                            Activate Comparison
+                        </button>
+                        <div class="comparison-panel" id="comparisonPanel">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Primary Product</label>
+                                    <select class="form-select" id="product1">
+                                        <option>Wayona N Computer</option>
+                                        <option>Ambrane Unbreakable</option>
+                                        <option>Source Fast Charging</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Competitor Product</label>
+                                    <select class="form-select" id="product2">
+                                        <option>Portronics Computer</option>
+                                        <option>pTron Solero</option>
+                                        <option>boAt Micro USB</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="compareChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Analytics Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="dashboard-card">
+                    <div class="card-header-professional">
+                        <span><i class="fas fa-database me-2"></i>Detailed Market Intelligence</span>
+                        <span class="badge">Advanced Analytics</span>
+                    </div>
+                    
+                    <!-- Professional Filters -->
+                    <div class="filter-section">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Time Period</label>
+                                <select class="form-select" id="dateFilter">
+                                    <option>Last 30 days</option>
+                                    <option>Last Quarter</option>
+                                    <option>Last 6 months</option>
+                                    <option>Last Year</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Rating Filter</label>
+                                <select class="form-select" id="ratingFilter">
+                                    <option>All Ratings</option>
+                                    <option>5 Stars</option>
+                                    <option>4+ Stars</option>
+                                    <option>3+ Stars</option>
+                                    <option>Below 3 Stars</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Product Category</label>
+                                <select class="form-select" id="categoryFilter">
+                                    <option>All Categories</option>
+                                    <option>Computer Accessories</option>
+                                    <option>Electronics</option>
+                                    <option>Mobile Accessories</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Search Analysis</label>
+                                <input type="text" class="form-control" id="keywordFilter" placeholder="Search insights...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover table-professional" id="reviewsTable">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Customer Rating</th>
+                                    <th>Review Summary</th>
+                                    <th>Sentiment Analysis</th>
+                                    <th>Date</th>
+                                    <th>Price Point</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reviewsTableBody">
+                                <!-- Dynamic content will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Professional Toast Notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="professionalToast" class="toast toast-professional" role="alert">
+            <div class="toast-header">
+                <i class="fas fa-info-circle text-primary me-2"></i>
+                <strong class="me-auto">McKinsey Analytics</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                Insight generated successfully!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Professional Business Data
+        const businessReviews = [
+            {
+                product: "Wayona N Computer Charger",
+                rating: 4.2,
+                review: "Exceptional build quality with fast charging capabilities. Highly recommended for business use.",
+                sentiment: "excellent",
+                date: "2024-03-12",
+                price: "$399"
+            },
+            {
+                product: "Ambrane Unbreakable Cable",
+                rating: 4.0,
+                review: "Solid performance and durability. Good value proposition for corporate procurement.",
+                sentiment: "good",
+                date: "2024-03-10",
+                price: "$199"
+            },
+            {
+                product: "Portronics Computer Hub",
+                rating: 4.2,
+                review: "Outstanding connectivity and premium design. Perfect for professional environments.",
+                sentiment: "excellent",
+                date: "2024-03-08",
+                price: "$154"
+            },
+            {
+                product: "pTron Solero Adapter",
+                rating: 3.9,
+                review: "Adequate performance for basic requirements. Suitable for budget-conscious buyers.",
+                sentiment: "good",
+                date: "2024-03-05",
+                price: "$149"
+            },
+            {
+                product: "boAt Micro USB Cable",
+                rating: 4.1,
+                review: "Reliable performance with excellent durability. Strong market positioning.",
+                sentiment: "excellent",
+                date: "2024-03-03",
+                price: "$176"
+            }
+        ];
+
+        // Theme Management
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('mckinsey-theme', newTheme);
+            
+            showToast(`Switched to ${newTheme} mode for optimal presentation`);
+            
+            // Reinitialize charts with new theme
+            setTimeout(() => {
+                initializeAllCharts();
+            }, 300);
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('mckinsey-theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+
+        // Professional Toast Notifications
+        function showToast(message) {
+            const toastElement = document.getElementById('professionalToast');
+            const toastBody = toastElement.querySelector('.toast-body');
+            toastBody.textContent = message;
+            
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
+
+        // KPI Insights
+        function showInsight(type) {
+            const insights = {
+                rating: "Customer satisfaction shows strong upward trend with 4.2/5 average rating",
+                sentiment: "75% positive sentiment indicates strong market acceptance and brand loyalty",
+                price: "Price positioning analysis reveals opportunities for premium segment expansion",
+                reviews: "15,247 reviews provide statistically significant insights for strategic decisions"
+            };
+            
+            showToast(insights[type]);
+        }
+
+        // Initialize Professional Charts
+        function initializeAllCharts() {
+            initializeTrendChart();
+            initializeScatterChart();
+            initializeCompareChart();
+        }
+
+        // Professional Trend Chart
+        function initializeTrendChart() {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            
+            if (window.trendChartInstance) {
+                window.trendChartInstance.destroy();
+            }
+            
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#FFFFFF' : '#343A40';
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            
+            window.trendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q1', 'Q2', 'Q3', 'Q4', 'Q1', 'Q2', 'Q3', 'Q4'],
+                    datasets: [{
+                        label: 'Customer Satisfaction',
+                        data: [4.1, 4.2, 4.0, 4.3, 4.2, 4.4, 4.1, 4.3, 4.2, 4.5, 4.3, 4.2],
+                        borderColor: '#003366',
+                        backgroundColor: 'rgba(0, 51, 102, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#003366',
+                        pointBorderColor: '#FFFFFF',
+                        pointBorderWidth: 2,
+                        pointRadius: 6
+                    }, {
+                        label: 'Market Sentiment',
+                        data: [0.7, 0.75, 0.72, 0.78, 0.76, 0.8, 0.74, 0.77, 0.75, 0.82, 0.79, 0.75],
+                        borderColor: '#0066CC',
+                        backgroundColor: 'rgba(0, 102, 204, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#0066CC',
+                        pointBorderColor: '#FFFFFF',
+                        pointBorderWidth: 2,
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: { size: 12, weight: '600' },
+                                color: textColor
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#FFFFFF',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#003366',
+                            borderWidth: 1,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: textColor, font: { weight: '500' } }
+                        },
+                        y: {
+                            grid: { color: gridColor },
+                            ticks: { color: textColor, font: { weight: '500' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Professional Scatter Chart
+        function initializeScatterChart() {
+            const ctx = document.getElementById('scatterChart').getContext('2d');
+            
+            if (window.scatterChartInstance) {
+                window.scatterChartInstance.destroy();
+            }
+            
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#FFFFFF' : '#343A40';
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            
+            window.scatterChartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Product Portfolio',
+                        data: [
+                            {x: 399, y: 0.42},
+                            {x: 199, y: 0.60},
+                            {x: 154, y: 0.68},
+                            {x: 149, y: 0.65},
+                            {x: 176, y: 0.58},
+                            {x: 229, y: 0.47},
+                            {x: 199, y: 0.50},
+                            {x: 219, y: 0.45}
+                        ],
+                        backgroundColor: function(context) {
+                            const colors = ['#003366', '#0066CC', '#4A90E2', '#FFB800', '#28A745', '#FFC107', '#DC3545', '#6C757D'];
+                            return colors[context.dataIndex % colors.length];
+                        },
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2,
+                        pointRadius: 10,
+                        pointHoverRadius: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#FFFFFF',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#003366',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Price: $${context.parsed.x}, Value Score: ${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Price Point ($)',
+                                font: { weight: '600', size: 14 },
+                                color: textColor
+                            },
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Value Perception Index',
+                                font: { weight: '600', size: 14 },
+                                color: textColor
+                            },
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Professional Compare Chart
+        function initializeCompareChart() {
+            const ctx = document.getElementById('compareChart').getContext('2d');
+            
+            if (window.compareChartInstance) {
+                window.compareChartInstance.destroy();
+            }
+            
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#FFFFFF' : '#343A40';
+            
+            window.compareChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Rating', 'Sentiment', 'Value', 'Durability', 'Design'],
+                    datasets: [{
+                        label: 'Primary Product',
+                        data: [4.2, 0.75, 0.8, 0.85, 0.9],
+                        borderColor: '#003366',
+                        backgroundColor: 'rgba(0, 51, 102, 0.2)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#003366',
+                        pointBorderColor: '#FFFFFF',
+                        pointBorderWidth: 2
+                    }, {
+                        label: 'Competitor',
+                        data: [4.0, 0.7, 0.75, 0.8, 0.85],
+                        borderColor: '#0066CC',
+                        backgroundColor: 'rgba(0, 102, 204, 0.2)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#0066CC',
+                        pointBorderColor: '#FFFFFF',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { weight: '600' },
+                                color: textColor
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 1,
+                            pointLabels: {
+                                font: { weight: '500' },
+                                color: textColor
+                            },
+                            ticks: { color: textColor }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate Professional Table
+        function populateReviewsTable() {
+            const tbody = document.getElementById('reviewsTableBody');
+            tbody.innerHTML = '';
+            
+            businessReviews.forEach((review, index) => {
+                const row = document.createElement('tr');
+                row.className = 'fade-in-up';
+                row.style.animationDelay = `${index * 0.1}s`;
+                
+                const sentimentClass = review.sentiment === 'excellent' ? 'status-excellent' : 
+                                     review.sentiment === 'good' ? 'status-good' : 'status-poor';
+                
+                row.innerHTML = `
+                    <td><strong>${review.product}</strong></td>
+                    <td>
+                        <div class="rating-display">
+                            <div class="rating-stars">
+                                ${'★'.repeat(Math.floor(review.rating))}${'☆'.repeat(5 - Math.floor(review.rating))}
+                            </div>
+                            <span class="rating-value">${review.rating}</span>
+                        </div>
+                    </td>
+                    <td>${review.review}</td>
+                    <td>
+                        <span class="status-badge ${sentimentClass}">
+                            ${review.sentiment}
+                        </span>
+                    </td>
+                    <td><strong>${review.date}</strong></td>
+                    <td><strong>${review.price}</strong></td>
+                `;
+                
+                row.addEventListener('click', () => {
+                    showToast(`Analyzing: ${review.product}`);
+                });
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Toggle Comparison Panel
+        function toggleComparison() {
+            const panel = document.getElementById('comparisonPanel');
+            const button = document.querySelector('.btn-outline-professional');
+            
+            if (panel.classList.contains('active')) {
+                panel.classList.remove('active');
+                button.innerHTML = '<i class="fas fa-plus me-2"></i>Activate Comparison';
+                showToast('Comparison analysis deactivated');
+            } else {
+                panel.classList.add('active');
+                button.innerHTML = '<i class="fas fa-minus me-2"></i>Deactivate Comparison';
+                showToast('Competitive analysis activated');
+            }
+        }
+
+        // Animate KPI Counters
+        function animateCounters() {
+            const counters = document.querySelectorAll('.kpi-value');
+            
+            counters.forEach((counter, index) => {
+                counter.style.opacity = '0';
+                counter.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    counter.style.transition = 'all 0.8s ease-out';
+                    counter.style.opacity = '1';
+                    counter.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        }
+
+        // Setup Professional Filters
+        function setupFilters() {
+            const filters = ['dateFilter', 'ratingFilter', 'categoryFilter', 'keywordFilter'];
+            
+            filters.forEach(filterId => {
+                const element = document.getElementById(filterId);
+                element.addEventListener('change', () => {
+                    showToast('Analysis filters updated');
+                });
+            });
+        }
+
+        // Initialize Dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTheme();
+            initializeAllCharts();
+            populateReviewsTable();
+            animateCounters();
+            setupFilters();
+            
+            // Staggered card animations
+            const cards = document.querySelectorAll('.dashboard-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+            
+            // Welcome message
+            setTimeout(() => {
+                showToast('McKinsey Analytics Dashboard initialized - Team Wavy');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
