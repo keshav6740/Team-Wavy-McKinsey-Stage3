@@ -531,7 +531,18 @@
 
     <!-- Chat Messages -->
     <div class="chat-messages" id="chatMessages" role="log" aria-live="polite">
-      <!-- Initial message will be added by JS -->
+        <div class="message-content">
+          🎯 <strong>Welcome to SmartChoice AI!</strong><br /><br />
+          I'm your Consumer Decision Journey assistant, powered by advanced clustering
+          algorithms that analyze thousands of real customer reviews.<br /><br />
+          I'll guide you through:<br />
+          📍 <strong>Awareness</strong> – Discover trending products<br />
+          🔍 <strong>Consideration</strong> – Compare top options<br />
+          ⚖️ <strong>Evaluation</strong> – Deep-dive analysis<br />
+          ✅ <strong>Decision</strong> – Final recommendation<br />
+          💬 <strong>Post-Purchase</strong> – Support & feedback<br /><br />
+          What type of product are you looking for today? 🛍️
+        </div>
     </div>
 
     <!-- Quick Suggestions -->
@@ -601,7 +612,7 @@
 
     let PRODUCT_DATABASE = []; 
     let ALL_CATEGORIES = []; 
-    const CSV_FILE_PATH = 'mckinsey.csv'; // Assuming it's in the same directory
+    const CSV_FILE_PATH = 'mckinsey_cleaned.csv'; // Assuming it's in the same directory
 
     // ───────────────── CSV Parsing and Data Processing ─────────────────
     function cleanPrice(priceStr) {
@@ -868,7 +879,6 @@
 
 
     async function initializeChatbot() {
-        addMessage("🚀 Initializing SmartChoice AI... Loading product data, please wait.", false);
         showProcessingIndicator();
         updateStage("Loading...");
 
