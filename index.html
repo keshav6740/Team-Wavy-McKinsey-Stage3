@@ -1,1370 +1,1621 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>McKinsey Analytics Dashboard - Team Wavy</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+  <title>SmartChoice AI - Consumer Decision Journey Assistant</title>
+  <style>
+    /* ─────────────────────── Reset & Global Styles ─────────────────────── */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden; /* Prevent scroll bars on body */
+    }
+
+    /* ───────────────────── Chat Container (Full-Screen) ──────────────────── */
+    .chat-container {
+      background: white;
+      width: 100vw;            /* full viewport width */
+      height: 100vh;           /* full viewport height */
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ───────────────────── Header ───────────────────── */
+    .chat-header {
+      background: linear-gradient(135deg, #4338ca 0%, #7c3aed 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .chat-header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .chat-header p {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      font-weight: 400;
+    }
+
+    .cdj-stage {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.7rem;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 5px 10px;
+      border-radius: 14px;
+      backdrop-filter: blur(8px);
+    }
+
+    /* ───────────────────── Messages Area ───────────────────── */
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+    }
+
+    .message {
+      margin-bottom: 18px;
+      animation: slideIn 0.4s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.bot {
+      text-align: left;
+    }
+
+    .message.user {
+      text-align: right;
+    }
+
+    .message-content {
+      display: inline-block;
+      padding: 12px 18px;
+      border-radius: 18px;
+      max-width: 85%;
+      word-wrap: break-word;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .message.bot .message-content {
+      background: white;
+      color: #374151;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+    }
+
+    .message.user .message-content {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+    }
     
-    <style>
-        :root {
-            /* McKinsey Professional Color Palette */
-            --mckinsey-navy: #003366;
-            --mckinsey-blue: #0066CC;
-            --mckinsey-light-blue: #4A90E2;
-            --mckinsey-gold: #FFB800;
-            --mckinsey-light-gold: #FFC933;
-            --mckinsey-gray: #6C757D;
-            --mckinsey-light-gray: #F8F9FA;
-            --mckinsey-dark-gray: #343A40;
-            
-            /* Light Theme */
-            --primary-color: var(--mckinsey-navy);
-            --secondary-color: var(--mckinsey-blue);
-            --accent-color: var(--mckinsey-gold);
-            --success-color: #28A745;
-            --warning-color: #FFC107;
-            --danger-color: #DC3545;
-            --info-color: var(--mckinsey-light-blue);
-            
-            --bg-primary: #FFFFFF;
-            --bg-secondary: var(--mckinsey-light-gray);
-            --bg-card: #FFFFFF;
-            --bg-sidebar: var(--mckinsey-navy);
-            
-            --text-primary: var(--mckinsey-dark-gray);
-            --text-secondary: var(--mckinsey-gray);
-            --text-light: #FFFFFF;
-            --text-muted: #6C757D;
-            
-            --border-color: #E9ECEF;
-            --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.05);
-            --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.15);
-            
-            --border-radius: 8px;
-            --border-radius-lg: 12px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        [data-theme="dark"] {
-            /* Dark Theme for Professional Evening Presentations */
-            --bg-primary: #1A1D23;
-            --bg-secondary: #2C3E50;
-            --bg-card: #34495E;
-            --bg-sidebar: #2C3E50;
-            
-            --text-primary: #FFFFFF;
-            --text-secondary: #BDC3C7;
-            --text-light: #FFFFFF;
-            --text-muted: #95A5A6;
-            
-            --border-color: #34495E;
-            --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.2);
-            --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.3);
-            --shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.4);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            transition: var(--transition);
-        }
-
-        /* Professional Header */
-        .dashboard-header {
-            background: var(--bg-card);
-            border-bottom: 2px solid var(--border-color);
-            padding: 1.5rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: var(--shadow-light);
-        }
-
-        .mckinsey-logo {
-            font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            font-size: 1.8rem;
-            color: var(--primary-color);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .mckinsey-logo::before {
-            content: '';
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .dashboard-title {
-            font-family: 'Playfair Display', serif;
-            color: var(--primary-color);
-            font-weight: 600;
-            font-size: 2rem;
-            margin: 0;
-        }
-
-        .dashboard-subtitle {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            font-weight: 400;
-            margin: 0;
-        }
-
-        .team-badge {
-            background: linear-gradient(135deg, var(--accent-color), var(--mckinsey-light-gold));
-            color: var(--primary-color);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        /* Theme Toggle - Professional Style */
-        .theme-toggle {
-            position: relative;
-            width: 60px;
-            height: 30px;
-            background: var(--border-color);
-            border-radius: 15px;
-            border: 2px solid var(--border-color);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .theme-toggle::before {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 22px;
-            height: 22px;
-            background: var(--primary-color);
-            border-radius: 50%;
-            transition: var(--transition);
-        }
-
-        [data-theme="dark"] .theme-toggle::before {
-            transform: translateX(28px);
-            background: var(--accent-color);
-        }
-
-        .theme-toggle:hover {
-            border-color: var(--secondary-color);
-        }
-
-        /* Professional Card Design */
-        .dashboard-card {
-            background: var(--bg-card);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-medium);
-            border: 1px solid var(--border-color);
-            transition: var(--transition);
-            margin-bottom: 2rem;
-            overflow: hidden;
-        }
-
-        .dashboard-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-heavy);
-            border-color: var(--secondary-color);
-        }
-
-        .card-header-professional {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--text-light);
-            border: none;
-            padding: 1.5rem 2rem;
-            font-weight: 600;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .card-header-professional .badge {
-            background: rgba(255, 255, 255, 0.2);
-            color: var(--text-light);
-            font-size: 0.75rem;
-            padding: 0.25rem 0.75rem;
-        }
-
-        /* KPI Metrics - McKinsey Style */
-        .kpi-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            padding: 2rem;
-        }
-
-        .kpi-card {
-            background: var(--bg-card);
-            padding: 2rem;
-            border-radius: var(--border-radius-lg);
-            border-left: 4px solid var(--secondary-color);
-            transition: var(--transition);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .kpi-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, transparent, rgba(0, 102, 204, 0.05));
-            opacity: 0;
-            transition: var(--transition);
-        }
-
-        .kpi-card:hover::before {
-            opacity: 1;
-        }
-
-        .kpi-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-medium);
-            border-left-color: var(--accent-color);
-        }
-
-        .kpi-value {
-            font-family: 'Inter', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .kpi-label {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .kpi-trend {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            font-size: 1.5rem;
-            z-index: 1;
-        }
-
-        .trend-up { color: var(--success-color); }
-        .trend-down { color: var(--danger-color); }
-        .trend-stable { color: var(--warning-color); }
-
-        /* Chart Containers */
-        .chart-container {
-            position: relative;
-            height: 400px;
-            padding: 2rem;
-        }
-
-        .chart-container-large {
-            height: 450px;
-        }
-
-        /* Business Insights Panel */
-        .insights-panel {
-            background: linear-gradient(135deg, var(--mckinsey-light-gray), #FFFFFF);
-            border-radius: var(--border-radius-lg);
-            padding: 2rem;
-            margin: 1rem;
-            border: 1px solid var(--border-color);
-        }
-
-        [data-theme="dark"] .insights-panel {
-            background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary));
-        }
-
-        .insight-item {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            background: var(--bg-card);
-            border-radius: var(--border-radius);
-            border-left: 3px solid var(--info-color);
-            transition: var(--transition);
-        }
-
-        .insight-item:hover {
-            transform: translateX(5px);
-            box-shadow: var(--shadow-light);
-        }
-
-        .insight-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--info-color), var(--secondary-color));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            margin-right: 1rem;
-            font-size: 1.1rem;
-        }
-
-        .insight-content h6 {
-            color: var(--primary-color);
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .insight-content p {
-            color: var(--text-secondary);
-            margin: 0;
-            font-size: 0.9rem;
-        }
-
-        /* Professional Buttons */
-        .btn-professional {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border: none;
-            color: var(--text-light);
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--border-radius);
-            font-weight: 600;
-            transition: var(--transition);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 0.9rem;
-        }
-
-        .btn-professional:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-medium);
-            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-            color: var(--text-light);
-        }
-
-        .btn-outline-professional {
-            background: transparent;
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--border-radius);
-            font-weight: 600;
-            transition: var(--transition);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 0.9rem;
-        }
-
-        .btn-outline-professional:hover {
-            background: var(--primary-color);
-            color: var(--text-light);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-medium);
-        }
-
-        /* Professional Table */
-        .table-professional {
-            background: var(--bg-card);
-            border-radius: var(--border-radius-lg);
-            overflow: hidden;
-            box-shadow: var(--shadow-medium);
-        }
-
-        .table-professional th {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--text-light);
-            border: none;
-            padding: 1.25rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 0.85rem;
-        }
-
-        .table-professional td {
-            padding: 1.25rem;
-            border-color: var(--border-color);
-            vertical-align: middle;
-            color: var(--text-primary);
-            transition: var(--transition);
-        }
-
-        .table-professional tbody tr:hover {
-            background: rgba(0, 102, 204, 0.05);
-            transform: scale(1.01);
-        }
-
-        /* Rating Display */
-        .rating-display {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .rating-stars {
-            color: var(--accent-color);
-            font-size: 1.1rem;
-        }
-
-        .rating-value {
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        /* Status Badges */
-        .status-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .status-excellent {
-            background: rgba(40, 167, 69, 0.1);
-            color: var(--success-color);
-            border: 1px solid rgba(40, 167, 69, 0.2);
-        }
-
-        .status-good {
-            background: rgba(255, 193, 7, 0.1);
-            color: var(--warning-color);
-            border: 1px solid rgba(255, 193, 7, 0.2);
-        }
-
-        .status-poor {
-            background: rgba(220, 53, 69, 0.1);
-            color: var(--danger-color);
-            border: 1px solid rgba(220, 53, 69, 0.2);
-        }
-
-        /* Filter Controls */
-        .filter-section {
-            background: var(--bg-card);
-            border-radius: var(--border-radius-lg);
-            padding: 2rem;
-            margin-bottom: 2rem;
-            border: 1px solid var(--border-color);
-        }
-
-        .filter-section .form-control,
-        .filter-section .form-select {
-            border-radius: var(--border-radius);
-            border: 1px solid var(--border-color);
-            background: var(--bg-card);
-            color: var(--text-primary);
-            transition: var(--transition);
-            padding: 0.75rem 1rem;
-        }
-
-        .filter-section .form-control:focus,
-        .filter-section .form-select:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
-        }
-
-        /* McKinsey-style Progress Bars */
-        .progress-professional {
-            height: 8px;
-            background: var(--border-color);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 0.5rem;
-        }
-
-        .progress-bar-professional {
-            height: 100%;
-            background: linear-gradient(90deg, var(--secondary-color), var(--info-color));
-            border-radius: 4px;
-            transition: width 1s ease-in-out;
-            position: relative;
-        }
-
-        /* Comparison Panel */
-        .comparison-panel {
-            background: var(--bg-card);
-            border-radius: var(--border-radius-lg);
-            padding: 2rem;
-            margin: 1rem;
-            border: 1px solid var(--border-color);
-            transform: scale(0.95);
-            opacity: 0;
-            transition: var(--transition);
-        }
-
-        .comparison-panel.active {
-            transform: scale(1);
-            opacity: 1;
-        }
-
-        /* Loading States */
-        .loading-indicator {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--border-color);
-            border-radius: 50%;
-            border-top-color: var(--secondary-color);
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .dashboard-title {
-                font-size: 1.5rem;
-            }
-            
-            .kpi-value {
-                font-size: 2rem;
-            }
-            
-            .chart-container {
-                height: 300px;
-                padding: 1rem;
-            }
-            
-            .kpi-container {
-                grid-template-columns: 1fr;
-                padding: 1rem;
-            }
-        }
-
-        /* Professional Animations */
-        .fade-in-up {
-            animation: fadeInUp 0.6s ease-out forwards;
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--secondary-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-color);
-        }
-
-        /* Toast Notifications */
-        .toast-professional {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            color: var(--text-primary);
-        }
-
-        /* Executive Summary Section */
-        .executive-summary {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--text-light);
-            padding: 3rem 2rem;
-            border-radius: var(--border-radius-lg);
-            margin-bottom: 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .executive-summary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 200px;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            transform: translate(50%, -50%);
-        }
-
-        .executive-summary h2 {
-            font-family: 'Playfair Display', serif;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .executive-summary p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            position: relative;
-            z-index: 1;
-        }
-    </style>
+    .product-image {
+        max-width: 70px; /* Slightly smaller */
+        max-height: 70px;
+        object-fit: contain;
+        border-radius: 8px;
+        margin-right: 12px;
+        float: left;
+        border: 1px solid #eee;
+    }
+
+
+    /* ───────────────────── Product & Insight Cards ───────────────────── */
+    .product-card {
+      background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 16px;
+      margin: 10px 0;
+      transition: all 0.3s ease;
+      clear: both; 
+    }
+
+    .product-card:hover {
+      border-color: #6366f1;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.12);
+    }
+
+    .product-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .product-name {
+      font-weight: 700;
+      color: #1f2937;
+      font-size: 1rem;
+      margin-right: 10px; /* Space for price */
+    }
+    
+    .recommendation-badge {
+        background-color: #10b981;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        margin-left: 8px;
+        vertical-align: middle;
+        display: inline-block; /* ensure it doesn't break line unnecessarily */
+    }
+
+
+    .product-price {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      white-space: nowrap; /* Prevent price from wrapping */
+    }
+
+    .product-rating {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .stars {
+      color: #fbbf24;
+      margin-right: 6px;
+    }
+
+    .rating-text {
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+
+    .cluster-scores {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); /* Adjusted */
+      gap: 8px; /* Adjusted */
+      margin: 14px 0;
+    }
+
+    .cluster-score {
+      background: #f1f5f9;
+      padding: 6px 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .cluster-name {
+      font-size: 0.6rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .cluster-value {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .cluster-bar {
+      height: 3px;
+      background: #e2e8f0;
+      border-radius: 2px;
+      margin-top: 3px;
+      overflow: hidden;
+    }
+
+    .cluster-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      border-radius: 2px;
+      transition: width 0.8s ease;
+    }
+
+    .product-summary {
+      font-size: 0.8rem;
+      color: #4b5563;
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+    
+    .product-actions button {
+        background-color: #7c3aed;
+        color: white;
+        border: none;
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+        margin-right: 5px;
+        transition: background-color 0.2s;
+    }
+    .product-actions button:hover {
+        background-color: #6d28d9;
+    }
+    .product-actions button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+
+
+    .cdj-insight {
+      background: linear-gradient(135deg, #ddd6fe 0%, #e0e7ff 100%);
+      border: 1px solid #a78bfa;
+      border-radius: 14px;
+      padding: 14px;
+      margin: 10px 0;
+    }
+
+    .insight-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .insight-icon {
+      font-size: 1.1rem;
+      margin-right: 6px;
+    }
+
+    .insight-title {
+      font-weight: 700;
+      color: #5b21b6;
+      font-size: 0.9rem;
+    }
+
+    .insight-content {
+      font-size: 0.8rem;
+      color: #6d28d9;
+      line-height: 1.4;
+    }
+
+    /* ───────────────────── Typing & Processing Indicators ───────────────────── */
+    .typing-indicator,
+    .processing-indicator {
+      display: none; /* Initially hidden */
+    }
+
+    .typing-indicator {
+      padding: 12px 18px;
+      background: white;
+      border-radius: 18px;
+      border: 1px solid #e5e7eb;
+      width: fit-content;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+      position: absolute; /* Position relative to chat-container */
+      bottom: 90px; 
+      left: 20px; /* Changed to left for bot typing */
+    }
+
+    .typing-dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    .typing-dots span {
+      width: 7px;
+      height: 7px;
+      background: #9ca3af;
+      border-radius: 50%;
+      animation: typing 1.4s infinite;
+    }
+
+    .typing-dots span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dots span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+      0%,
+      60%,
+      100% {
+        transform: translateY(0);
+      }
+      30% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .processing-indicator {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 1px solid #f59e0b;
+      color: #92400e;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      text-align: center;
+      position: fixed; 
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: 500;
+      z-index: 1000;
+      border-radius: 10px;
+    }
+
+    /* ───────────────────── Quick Suggestions Bar ───────────────────── */
+    .quick-suggestions {
+      padding: 0 20px 14px;
+      background: white;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      flex-shrink: 0;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+
+    .suggestion-btn {
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      padding: 8px 14px;
+      border-radius: 18px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+     .suggestion-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .suggestion-btn:not(:disabled):hover {
+      background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    /* ───────────────────── Chat Input Area ───────────────────── */
+    .chat-input {
+      padding: 20px;
+      background: white;
+      border-top: 1px solid #e5e7eb;
+      flex-shrink: 0;
+    }
+
+    .input-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 1px solid #e5e7eb;
+      border-radius: 24px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .chat-input input:focus {
+      border-color: #6366f1;
+    }
+    .chat-input input:disabled {
+        background-color: #f3f4f6;
+        cursor: not-allowed;
+    }
+
+    .send-btn {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+      border: none;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .send-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+    .send-btn:disabled {
+        background: #d1d5db;
+        cursor: not-allowed;
+    }
+
+    .send-btn:not(:disabled):hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35);
+    }
+
+    /* ───────────────────── Table Styles (Comparison) ───────────────────── */
+    .comparison-table {
+      margin: 14px 0;
+      overflow-x: auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .comparison-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 10px 6px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.8rem;
+    }
+    .comparison-table td:first-child, .comparison-table th:first-child {
+        font-weight: 600;
+        min-width: 120px;
+    }
+    .comparison-table td:not(:first-child), .comparison-table th:not(:first-child) {
+        text-align: center;
+    }
+
+
+    .comparison-table th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.85rem;
+    }
+    .comparison-table tr:last-child td {
+        border-bottom: none;
+    }
+  </style>
 </head>
-<body data-theme="light">
-    <!-- Professional Header -->
-    <header class="dashboard-header">
-        <div class="container-fluid">
-            <div class="row align-items-center">
-                <div class="col-md-3">
-                    <a href="#" class="mckinsey-logo">
-                        McKinsey Analytics
-                    </a>
-                </div>
-                <div class="col-md-6 text-center">
-                    <h1 class="dashboard-title">Product Intelligence Dashboard</h1>
-                    <p class="dashboard-subtitle">Strategic Insights for Market Leadership</p>
-                </div>
-                <div class="col-md-3 text-end">
-                    <div class="d-flex align-items-center justify-content-end gap-3">
-                        <span class="team-badge">
-                            <i class="fas fa-wave-square me-1"></i>
-                            Team Wavy
-                        </span>
-                        <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme"></div>
-                        <button class="btn btn-professional">
-                            <i class="fas fa-download me-2"></i>Export Report
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
 
-    <!-- Main Dashboard -->
-    <div class="container-fluid py-4">
-        <!-- Executive Summary -->
-        <div class="row">
-            <div class="col-12">
-                <div class="executive-summary">
-                    <h2><i class="fas fa-chart-line me-3"></i>Executive Summary</h2>
-                    <p>Comprehensive analysis of product performance metrics across 15,247 customer reviews, revealing key insights for strategic decision-making and market positioning optimization.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- KPI Metrics -->
-        <div class="row">
-            <div class="col-12">
-                <div class="dashboard-card">
-                    <div class="card-header-professional">
-                        <span><i class="fas fa-tachometer-alt me-2"></i>Key Performance Indicators</span>
-                        <span class="badge">Real-time</span>
-                    </div>
-                    <div class="kpi-container">
-                        <div class="kpi-card" onclick="showInsight('rating')">
-                            <div class="kpi-trend trend-up">
-                                <i class="fas fa-arrow-up"></i>
-                            </div>
-                            <div class="kpi-value" id="avgRating">4.2</div>
-                            <div class="kpi-label">Average Customer Rating</div>
-                        </div>
-                        <div class="kpi-card" onclick="showInsight('sentiment')">
-                            <div class="kpi-trend trend-up">
-                                <i class="fas fa-arrow-up"></i>
-                            </div>
-                            <div class="kpi-value" id="sentimentScore">75%</div>
-                            <div class="kpi-label">Positive Sentiment</div>
-                        </div>
-                        <div class="kpi-card" onclick="showInsight('price')">
-                            <div class="kpi-trend trend-stable">
-                                <i class="fas fa-minus"></i>
-                            </div>
-                            <div class="kpi-value" id="priceRange">$199-$899</div>
-                            <div class="kpi-label">Price Range</div>
-                        </div>
-                        <div class="kpi-card" onclick="showInsight('reviews')">
-                            <div class="kpi-trend trend-up">
-                                <i class="fas fa-arrow-up"></i>
-                            </div>
-                            <div class="kpi-value" id="totalReviews">15,247</div>
-                            <div class="kpi-label">Total Reviews Analyzed</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <!-- Market Trend Analysis -->
-            <div class="col-lg-8">
-                <div class="dashboard-card">
-                    <div class="card-header-professional">
-                        <span><i class="fas fa-chart-area me-2"></i>Market Trend Analysis</span>
-                        <span class="badge">12-Month View</span>
-                    </div>
-                    <div class="chart-container chart-container-large">
-                        <canvas id="trendChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Strategic Insights -->
-            <div class="col-lg-4">
-                <div class="dashboard-card">
-                    <div class="card-header-professional">
-                        <span><i class="fas fa-lightbulb me-2"></i>Strategic Insights</span>
-                    </div>
-                    <div class="insights-panel">
-                        <div class="insight-item">
-                            <div class="insight-icon">
-                                <i class="fas fa-battery-full"></i>
-                            </div>
-                            <div class="insight-content">
-                                <h6>Battery Performance</h6>
-                                <p>85% satisfaction rate - Key differentiator</p>
-                                <div class="progress-professional">
-                                    <div class="progress-bar-professional" style="width: 85%"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="insight-item">
-                            <div class="insight-icon">
-                                <i class="fas fa-palette"></i>
-                            </div>
-                            <div class="insight-content">
-                                <h6>Design Excellence</h6>
-                                <p>92% approval - Premium positioning</p>
-                                <div class="progress-professional">
-                                    <div class="progress-bar-professional" style="width: 92%"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="insight-item">
-                            <div class="insight-icon">
-                                <i class="fas fa-dollar-sign"></i>
-                            </div>
-                            <div class="insight-content">
-                                <h6>Value Proposition</h6>
-                                <p>78% value perception - Optimization needed</p>
-                                <div class="progress-professional">
-                                    <div class="progress-bar-professional" style="width: 78%"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="insight-item">
-                            <div class="insight-icon">
-                                <i class="fas fa-shield-alt"></i>
-                            </div>
-                            <div class="insight-content">
-                                <h6>Durability Index</h6>
-                                <p>88% reliability score - Competitive advantage</p>
-                                <div class="progress-professional">
-                                    <div class="progress-bar-professional" style="width: 88%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <!-- Value-Price Matrix -->
-            <div class="col-lg-6">
-                <div class="dashboard-card">
-                    <div class="card-header-professional">
-                        <span><i class="fas fa-chart-scatter me-2"></i>Value-Price Matrix</span>
-                        <span class="badge">Portfolio Analysis</span>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="scatterChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Competitive Benchmarking -->
-            <div class="col-lg-6">
-                <div class="dashboard-card">
-                    <div class="card-header-professional">
-                        <span><i class="fas fa-balance-scale me-2"></i>Competitive Benchmarking</span>
-                    </div>
-                    <div class="p-3">
-                        <button class="btn btn-outline-professional mb-3" onclick="toggleComparison()">
-                            <i class="fas fa-plus me-2"></i>
-                            Activate Comparison
-                        </button>
-                        <div class="comparison-panel" id="comparisonPanel">
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Primary Product</label>
-                                    <select class="form-select" id="product1">
-                                        <option>Wayona N Computer</option>
-                                        <option>Ambrane Unbreakable</option>
-                                        <option>Source Fast Charging</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Competitor Product</label>
-                                    <select class="form-select" id="product2">
-                                        <option>Portronics Computer</option>
-                                        <option>pTron Solero</option>
-                                        <option>boAt Micro USB</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="chart-container" style="height: 300px;">
-                                <canvas id="compareChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Detailed Analytics Table -->
-        <div class="row">
-            <div class="col-12">
-                <div class="dashboard-card">
-                    <div class="card-header-professional">
-                        <span><i class="fas fa-database me-2"></i>Detailed Market Intelligence</span>
-                        <span class="badge">Advanced Analytics</span>
-                    </div>
-                    
-                    <!-- Professional Filters -->
-                    <div class="filter-section">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Time Period</label>
-                                <select class="form-select" id="dateFilter">
-                                    <option>Last 30 days</option>
-                                    <option>Last Quarter</option>
-                                    <option>Last 6 months</option>
-                                    <option>Last Year</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Rating Filter</label>
-                                <select class="form-select" id="ratingFilter">
-                                    <option>All Ratings</option>
-                                    <option>5 Stars</option>
-                                    <option>4+ Stars</option>
-                                    <option>3+ Stars</option>
-                                    <option>Below 3 Stars</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Product Category</label>
-                                <select class="form-select" id="categoryFilter">
-                                    <option>All Categories</option>
-                                    <option>Computer Accessories</option>
-                                    <option>Electronics</option>
-                                    <option>Mobile Accessories</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Search Analysis</label>
-                                <input type="text" class="form-control" id="keywordFilter" placeholder="Search insights...">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-hover table-professional" id="reviewsTable">
-                            <thead>
-                                <tr>
-                                    <th>Product Name</th>
-                                    <th>Customer Rating</th>
-                                    <th>Review Summary</th>
-                                    <th>Sentiment Analysis</th>
-                                    <th>Date</th>
-                                    <th>Price Point</th>
-                                </tr>
-                            </thead>
-                            <tbody id="reviewsTableBody">
-                                <!-- Dynamic content will be inserted here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+<body>
+  <div class="chat-container" role="application">
+    <!-- Header -->
+    <div class="chat-header">
+      <h1>SmartChoice AI</h1>
+      <p>Consumer Decision Journey Assistant</p>
+      <div class="cdj-stage" id="cdjStage">Loading...</div>
     </div>
 
-    <!-- Professional Toast Notifications -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="professionalToast" class="toast toast-professional" role="alert">
-            <div class="toast-header">
-                <i class="fas fa-info-circle text-primary me-2"></i>
-                <strong class="me-auto">McKinsey Analytics</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-            </div>
-            <div class="toast-body">
-                Insight generated successfully!
-            </div>
-        </div>
+    <!-- Processing Indicator (Center Overlay) -->
+    <div class="processing-indicator" id="processingIndicator" aria-live="assertive">
+      🧠 Analyzing data and synthesizing recommendations...
     </div>
 
-    <script>
-        // Professional Business Data
-        const businessReviews = [
-            {
-                product: "Wayona N Computer Charger",
-                rating: 4.2,
-                review: "Exceptional build quality with fast charging capabilities. Highly recommended for business use.",
-                sentiment: "excellent",
-                date: "2024-03-12",
-                price: "$399"
-            },
-            {
-                product: "Ambrane Unbreakable Cable",
-                rating: 4.0,
-                review: "Solid performance and durability. Good value proposition for corporate procurement.",
-                sentiment: "good",
-                date: "2024-03-10",
-                price: "$199"
-            },
-            {
-                product: "Portronics Computer Hub",
-                rating: 4.2,
-                review: "Outstanding connectivity and premium design. Perfect for professional environments.",
-                sentiment: "excellent",
-                date: "2024-03-08",
-                price: "$154"
-            },
-            {
-                product: "pTron Solero Adapter",
-                rating: 3.9,
-                review: "Adequate performance for basic requirements. Suitable for budget-conscious buyers.",
-                sentiment: "good",
-                date: "2024-03-05",
-                price: "$149"
-            },
-            {
-                product: "boAt Micro USB Cable",
-                rating: 4.1,
-                review: "Reliable performance with excellent durability. Strong market positioning.",
-                sentiment: "excellent",
-                date: "2024-03-03",
-                price: "$176"
-            }
-        ];
+    <!-- Chat Messages -->
+    <div class="chat-messages" id="chatMessages" role="log" aria-live="polite">
+      <!-- Initial message will be added by JS -->
+    </div>
 
-        // Theme Management
-        function toggleTheme() {
-            const body = document.body;
-            const currentTheme = body.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
-            body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('mckinsey-theme', newTheme);
-            
-            showToast(`Switched to ${newTheme} mode for optimal presentation`);
-            
-            // Reinitialize charts with new theme
-            setTimeout(() => {
-                initializeAllCharts();
-            }, 300);
+    <!-- Quick Suggestions -->
+    <div class="quick-suggestions" id="quickSuggestions">
+      <!-- Suggestions will be populated dynamically -->
+    </div>
+
+    <!-- Typing Indicator (Bottom-Left for bot) -->
+    <div class="typing-indicator" id="typingIndicator" aria-hidden="true">
+      <div class="typing-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- Chat Input -->
+    <div class="chat-input">
+      <div class="input-container">
+        <input
+          type="text"
+          id="userInput"
+          placeholder="Loading product data..."
+          aria-label="Type your message here"
+          onkeypress="handleKeyPress(event)"
+          disabled 
+        />
+        <button
+          class="send-btn"
+          id="sendBtn"
+          onclick="sendMessage()"
+          aria-label="Send message"
+          disabled
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="m22 2-7 20-4-9-9-4z"></path>
+            <path d="M22 2 11 13"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ───────────────── CDJ Stages & Data ─────────────────
+    const CDJ_STAGES = {
+      AWARENESS: 'Awareness',
+      CONSIDERATION: 'Consideration',
+      EVALUATION: 'Evaluation',
+      DECISION: 'Decision',
+      POST_PURCHASE: 'Post-Purchase'
+    };
+
+    let currentStage = CDJ_STAGES.AWARENESS;
+    let userContext = {
+      productCategory: null,
+      preferences: {},
+      viewedProducts: [],
+      stage: CDJ_STAGES.AWARENESS,
+      lastRecommendedProduct: null
+    };
+
+    let PRODUCT_DATABASE = []; 
+    let ALL_CATEGORIES = []; 
+    const CSV_FILE_PATH = 'mckinsey.csv'; // Assuming it's in the same directory
+
+    // ───────────────── CSV Parsing and Data Processing ─────────────────
+    function cleanPrice(priceStr) {
+        if (priceStr === undefined || priceStr === null || priceStr.trim() === "") return 0;
+        return parseFloat(String(priceStr).replace(/[^0-9.]/g, '')); // Keep only numbers and .
+    }
+
+    function cleanRatingCount(countStr) {
+        if (countStr === undefined || countStr === null || countStr.trim() === "") return 0;
+        return parseInt(String(countStr).replace(/[^0-9]/g, ''), 10); // Keep only numbers
+    }
+    
+    function cleanRating(ratingStr) {
+        if (ratingStr === undefined || ratingStr === null || String(ratingStr).trim() === "") return 0;
+        const rating = parseFloat(String(ratingStr));
+        return isNaN(rating) ? 0 : rating;
+    }
+    
+    function cleanDiscountPercentage(percentageStr) {
+        if (percentageStr === undefined || percentageStr === null || String(percentageStr).trim() === "") return "0%";
+        return String(percentageStr).trim(); // Keep as string, e.g., "64%"
+    }
+
+
+    function getPrimaryCategory(categoryStr) {
+        if (!categoryStr) return "Uncategorized";
+        // Try to get the most specific category, often the last part
+        const parts = categoryStr.split('|').map(s => s.trim());
+        // Filter out generic terms if they are too broad like "Accessories&Peripherals" if more specific follows
+        const specificParts = parts.filter(part => !['Accessories&Peripherals', 'Cables&Accessories', 'NetworkingDevices', 'HomeTheater,TV&Video', 'Accessories'].includes(part));
+        
+        if (specificParts.length > 0) {
+            // Prioritize more descriptive categories
+            if (specificParts.includes("USBCables")) return "USBCables";
+            if (specificParts.includes("SmartTelevisions")) return "SmartTelevisions";
+            if (specificParts.includes("WirelessUSBAdapters")) return "WirelessUSBAdapters";
+            if (specificParts.includes("HDMICables")) return "HDMICables";
+            return specificParts[specificParts.length - 1]; // Last specific part
         }
+        return parts[parts.length - 1] || "Uncategorized"; // Fallback to last part overall
+    }
 
-        function loadTheme() {
-            const savedTheme = localStorage.getItem('mckinsey-theme') || 'light';
-            document.body.setAttribute('data-theme', savedTheme);
-        }
+    function parseCSV(csvText) {
+        const lines = csvText.split(/\r?\n/); // Handles both \n and \r\n
+        if (lines.length < 2) return []; 
 
-        // Professional Toast Notifications
-        function showToast(message) {
-            const toastElement = document.getElementById('professionalToast');
-            const toastBody = toastElement.querySelector('.toast-body');
-            toastBody.textContent = message;
-            
-            const toast = new bootstrap.Toast(toastElement);
-            toast.show();
-        }
+        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+        const data = [];
 
-        // KPI Insights
-        function showInsight(type) {
-            const insights = {
-                rating: "Customer satisfaction shows strong upward trend with 4.2/5 average rating",
-                sentiment: "75% positive sentiment indicates strong market acceptance and brand loyalty",
-                price: "Price positioning analysis reveals opportunities for premium segment expansion",
-                reviews: "15,247 reviews provide statistically significant insights for strategic decisions"
-            };
-            
-            showToast(insights[type]);
-        }
+        for (let i = 1; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (!line) continue;
 
-        // Initialize Professional Charts
-        function initializeAllCharts() {
-            initializeTrendChart();
-            initializeScatterChart();
-            initializeCompareChart();
-        }
+            const values = [];
+            let inQuotes = false;
+            let currentValue = '';
+            let lastCharIsQuote = false;
 
-        // Professional Trend Chart
-        function initializeTrendChart() {
-            const ctx = document.getElementById('trendChart').getContext('2d');
-            
-            if (window.trendChartInstance) {
-                window.trendChartInstance.destroy();
-            }
-            
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            const textColor = isDark ? '#FFFFFF' : '#343A40';
-            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            
-            window.trendChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q1', 'Q2', 'Q3', 'Q4', 'Q1', 'Q2', 'Q3', 'Q4'],
-                    datasets: [{
-                        label: 'Customer Satisfaction',
-                        data: [4.1, 4.2, 4.0, 4.3, 4.2, 4.4, 4.1, 4.3, 4.2, 4.5, 4.3, 4.2],
-                        borderColor: '#003366',
-                        backgroundColor: 'rgba(0, 51, 102, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#003366',
-                        pointBorderColor: '#FFFFFF',
-                        pointBorderWidth: 2,
-                        pointRadius: 6
-                    }, {
-                        label: 'Market Sentiment',
-                        data: [0.7, 0.75, 0.72, 0.78, 0.76, 0.8, 0.74, 0.77, 0.75, 0.82, 0.79, 0.75],
-                        borderColor: '#0066CC',
-                        backgroundColor: 'rgba(0, 102, 204, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#0066CC',
-                        pointBorderColor: '#FFFFFF',
-                        pointBorderWidth: 2,
-                        pointRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 20,
-                                font: { size: 12, weight: '600' },
-                                color: textColor
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            titleColor: '#FFFFFF',
-                            bodyColor: '#FFFFFF',
-                            borderColor: '#003366',
-                            borderWidth: 1,
-                            cornerRadius: 8
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: textColor, font: { weight: '500' } }
-                        },
-                        y: {
-                            grid: { color: gridColor },
-                            ticks: { color: textColor, font: { weight: '500' } }
-                        }
+            for (let j = 0; j < line.length; j++) {
+                const char = line[j];
+                lastCharIsQuote = false;
+
+                if (char === '"') {
+                    if (inQuotes && j + 1 < line.length && line[j+1] === '"') { // Escaped quote
+                        currentValue += '"';
+                        j++; // Skip next quote
+                    } else {
+                        inQuotes = !inQuotes;
+                        if (!inQuotes) lastCharIsQuote = true; // Mark end of quoted field
                     }
+                } else if (char === ',' && !inQuotes) {
+                    values.push(currentValue.trim().replace(/^"|"$/g, ''));
+                    currentValue = '';
+                } else {
+                    currentValue += char;
                 }
-            });
-        }
-
-        // Professional Scatter Chart
-        function initializeScatterChart() {
-            const ctx = document.getElementById('scatterChart').getContext('2d');
-            
-            if (window.scatterChartInstance) {
-                window.scatterChartInstance.destroy();
             }
-            
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            const textColor = isDark ? '#FFFFFF' : '#343A40';
-            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            
-            window.scatterChartInstance = new Chart(ctx, {
-                type: 'scatter',
-                data: {
-                    datasets: [{
-                        label: 'Product Portfolio',
-                        data: [
-                            {x: 399, y: 0.42},
-                            {x: 199, y: 0.60},
-                            {x: 154, y: 0.68},
-                            {x: 149, y: 0.65},
-                            {x: 176, y: 0.58},
-                            {x: 229, y: 0.47},
-                            {x: 199, y: 0.50},
-                            {x: 219, y: 0.45}
-                        ],
-                        backgroundColor: function(context) {
-                            const colors = ['#003366', '#0066CC', '#4A90E2', '#FFB800', '#28A745', '#FFC107', '#DC3545', '#6C757D'];
-                            return colors[context.dataIndex % colors.length];
-                        },
-                        borderColor: '#FFFFFF',
-                        borderWidth: 2,
-                        pointRadius: 10,
-                        pointHoverRadius: 12
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            titleColor: '#FFFFFF',
-                            bodyColor: '#FFFFFF',
-                            borderColor: '#003366',
-                            borderWidth: 1,
-                            cornerRadius: 8,
-                            callbacks: {
-                                label: function(context) {
-                                    return `Price: $${context.parsed.x}, Value Score: ${context.parsed.y.toFixed(2)}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Price Point ($)',
-                                font: { weight: '600', size: 14 },
-                                color: textColor
-                            },
-                            grid: { color: gridColor },
-                            ticks: { color: textColor }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Value Perception Index',
-                                font: { weight: '600', size: 14 },
-                                color: textColor
-                            },
-                            grid: { color: gridColor },
-                            ticks: { color: textColor }
-                        }
-                    }
-                }
-            });
-        }
+            values.push(currentValue.trim().replace(/^"|"$/g, ''));
 
-        // Professional Compare Chart
-        function initializeCompareChart() {
-            const ctx = document.getElementById('compareChart').getContext('2d');
-            
-            if (window.compareChartInstance) {
-                window.compareChartInstance.destroy();
-            }
-            
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            const textColor = isDark ? '#FFFFFF' : '#343A40';
-            
-            window.compareChartInstance = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['Rating', 'Sentiment', 'Value', 'Durability', 'Design'],
-                    datasets: [{
-                        label: 'Primary Product',
-                        data: [4.2, 0.75, 0.8, 0.85, 0.9],
-                        borderColor: '#003366',
-                        backgroundColor: 'rgba(0, 51, 102, 0.2)',
-                        borderWidth: 2,
-                        pointBackgroundColor: '#003366',
-                        pointBorderColor: '#FFFFFF',
-                        pointBorderWidth: 2
-                    }, {
-                        label: 'Competitor',
-                        data: [4.0, 0.7, 0.75, 0.8, 0.85],
-                        borderColor: '#0066CC',
-                        backgroundColor: 'rgba(0, 102, 204, 0.2)',
-                        borderWidth: 2,
-                        pointBackgroundColor: '#0066CC',
-                        pointBorderColor: '#FFFFFF',
-                        pointBorderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                font: { weight: '600' },
-                                color: textColor
-                            }
-                        }
-                    },
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            max: 1,
-                            pointLabels: {
-                                font: { weight: '500' },
-                                color: textColor
-                            },
-                            ticks: { color: textColor }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Populate Professional Table
-        function populateReviewsTable() {
-            const tbody = document.getElementById('reviewsTableBody');
-            tbody.innerHTML = '';
-            
-            businessReviews.forEach((review, index) => {
-                const row = document.createElement('tr');
-                row.className = 'fade-in-up';
-                row.style.animationDelay = `${index * 0.1}s`;
-                
-                const sentimentClass = review.sentiment === 'excellent' ? 'status-excellent' : 
-                                     review.sentiment === 'good' ? 'status-good' : 'status-poor';
-                
-                row.innerHTML = `
-                    <td><strong>${review.product}</strong></td>
-                    <td>
-                        <div class="rating-display">
-                            <div class="rating-stars">
-                                ${'★'.repeat(Math.floor(review.rating))}${'☆'.repeat(5 - Math.floor(review.rating))}
-                            </div>
-                            <span class="rating-value">${review.rating}</span>
-                        </div>
-                    </td>
-                    <td>${review.review}</td>
-                    <td>
-                        <span class="status-badge ${sentimentClass}">
-                            ${review.sentiment}
-                        </span>
-                    </td>
-                    <td><strong>${review.date}</strong></td>
-                    <td><strong>${review.price}</strong></td>
-                `;
-                
-                row.addEventListener('click', () => {
-                    showToast(`Analyzing: ${review.product}`);
+            if (values.length === headers.length) {
+                const entry = {};
+                headers.forEach((header, index) => {
+                    entry[header] = values[index] || ""; // Ensure empty string if undefined
                 });
-                
-                tbody.appendChild(row);
-            });
-        }
-
-        // Toggle Comparison Panel
-        function toggleComparison() {
-            const panel = document.getElementById('comparisonPanel');
-            const button = document.querySelector('.btn-outline-professional');
-            
-            if (panel.classList.contains('active')) {
-                panel.classList.remove('active');
-                button.innerHTML = '<i class="fas fa-plus me-2"></i>Activate Comparison';
-                showToast('Comparison analysis deactivated');
+                data.push(entry);
             } else {
-                panel.classList.add('active');
-                button.innerHTML = '<i class="fas fa-minus me-2"></i>Deactivate Comparison';
-                showToast('Competitive analysis activated');
+                console.warn(`Skipping malformed line ${i+1} (length mismatch: ${values.length} vs ${headers.length}): `, line.substring(0,100) + "...");
+            }
+        }
+        return data;
+    }
+    
+    function processProductData(rawProducts) {
+        return rawProducts.map((p, index) => {
+            if (!p.product_id) {
+                console.warn(`Product at index ${index} missing product_id, assigning temporary ID.`);
+                p.product_id = `temp_id_${index}`;
+            }
+            return {
+                id: p.product_id,
+                name: p.product_name || "Unnamed Product",
+                category_full: p.category || "N/A",
+                category: getPrimaryCategory(p.category),
+                price: cleanPrice(p.discounted_price),
+                actual_price: cleanPrice(p.actual_price),
+                discount_percentage: cleanDiscountPercentage(p.discount_percentage),
+                rating: cleanRating(p.rating),
+                reviews: cleanRatingCount(p.rating_count),
+                about: p.about_product || "",
+                review_content_sample: p.review_content || "", 
+                img_link: p.img_link || "",
+                product_link: p.product_link || "",
+                clusters: {}, 
+                keyInsights: [] 
+            };
+        });
+    }
+    
+    const CLUSTER_KEYWORDS = {
+        USBCables: {
+            "Charging Speed": ['fast charging', 'quick charge', '3a', '60w', '65w', 'speed', 'rapid', 'charge speed', 'watts', 'amps', 'turbo charging'],
+            "Durability": ['durable', 'unbreakable', 'braided', 'sturdy', 'strong', 'tough', 'lifespan', 'bend', 'robust', 'long lasting', 'quality material'],
+            "Compatibility": ['compatible', 'iphone', 'android', 'type c', 'micro usb', 'lightning', 'devices', 'works with', 'connects to', 'supports'],
+            "Value": ['value for money', 'good price', 'cheap', 'affordable', 'worthy', 'economical', 'reasonable price'],
+            "Length": ['length', 'long', 'meter', 'ft', 'short', 'size'],
+            "Data Transfer": ['data sync', 'transfer speed', '480mbps', 'data transmission', 'syncing']
+        },
+        SmartTelevisions: {
+            "Picture Quality": ['picture quality', 'hd', '4k', 'vivid', 'clear screen', 'resolution', 'display', 'hdr', 'color', 'contrast', 'brightness', 'uhd', 'qled', 'oled'],
+            "Sound Quality": ['sound', 'audio', 'dolby', 'dts', 'speakers', 'loud', 'bass', 'clear audio'],
+            "Smart Features": ['smart tv', 'android tv', 'apps', 'netflix', 'prime video', 'chromecast', 'os', 'interface', 'google assistant', 'voice control', 'patchwall'],
+            "Connectivity": ['hdmi', 'usb', 'wifi', 'bluetooth', 'ports', 'ethernet', 'connect', 'dual band'],
+            "Value": ['value for money', 'good price', 'budget', 'affordable', 'worth', 'price range'],
+            "Performance": ['lag', 'smooth', 'fast', 'responsive', 'processor', 'ram', 'performance'],
+            "Build/Design": ['design', 'slim', 'stylish', 'build quality', 'bezel-less', 'looks']
+        },
+        WirelessUSBAdapters: {
+            "Speed & Performance": ['speed', 'fast', 'mbps', 'high speed', 'performance', 'data transmission', 'throughput', 'n150', 'ac600'],
+            "Connectivity & Range": ['connect', 'signal', 'range', 'stable', 'wifi', 'dual band', 'coverage', 'reception'],
+            "Ease of Use": ['easy setup', 'plug and play', 'simple', 'install', 'drivers'],
+            "Compatibility": ['windows', 'mac', 'linux', 'compatible', 'pc', 'laptop', 'desktop', 'os support'],
+            "Value": ['value for money', 'good price', 'affordable', 'budget-friendly'],
+            "Size & Design": ['nano', 'mini', 'compact', 'design', 'small']
+        },
+        HDMICables: {
+            "Signal & Picture Quality": ['4k', 'hdmi', 'signal', 'clear picture', '1080p', 'video quality', 'ethernet', 'bandwidth', '18gbps', 'hdr', 'sound quality', 'arc'],
+            "Durability & Build": ['durable', 'braided', 'sturdy', 'strong', 'build quality', 'flexible', 'gold-plated', 'shielding'],
+            "Length & Flexibility": ['length', 'long', 'meter', 'feet', 'flexible', 'size'],
+            "Value": ['value for money', 'good price', 'affordable', 'economical'],
+            "Compatibility": ['compatible', 'devices', 'ps4', 'xbox', 'tv', 'projector', 'apple tv', 'blu-ray']
+        },
+        RemoteControls: { // Assuming this might be a category from your full CSV
+            "Compatibility": ['compatible', 'samsung tv', 'lg tv', 'works with', 'model', 'series'],
+            "Ease of Use": ['easy to use', 'buttons', 'layout', 'simple', 'pairing'],
+            "Functionality": ['hotkeys', 'voice control', 'features', 'works well', 'responsive'],
+            "Build Quality": ['durable', 'sturdy', 'quality', 'feel'],
+            "Value": ['good price', 'affordable', 'replacement']
+        },
+        Default: { 
+            "Overall Quality": ['good quality', 'well made', 'works well', 'reliable', 'sturdy', 'durable'],
+            "Performance": ['fast', 'efficient', 'performs', 'speed', 'works as expected'],
+            "Ease of Use": ['easy to use', 'simple', 'convenient', 'user-friendly'],
+            "Value": ['value for money', 'good price', 'affordable', 'worth it']
+        }
+    };
+
+    function getSimulatedClusterScores(product) {
+        const scores = {};
+        const textToAnalyze = (product.about + ' ' + (product.review_content_sample || '') + ' ' + product.name).toLowerCase();
+        
+        const categoryKeywords = CLUSTER_KEYWORDS[product.category] || CLUSTER_KEYWORDS.Default;
+
+        for (const clusterName in categoryKeywords) {
+            let score = 0;
+            let foundKeywords = 0;
+            categoryKeywords[clusterName].forEach(kw => {
+                const regex = new RegExp(`\\b${kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'gi');
+                const matches = textToAnalyze.match(regex);
+                if (matches) {
+                    score += matches.length * 5; // Base score per keyword match
+                    foundKeywords++;
+                }
+            });
+            
+            // Normalize score based on how many keywords were found for this cluster and add rating bonus
+            if (foundKeywords > 0) {
+                score = (score / (categoryKeywords[clusterName].length * 0.8)) * 60; // Scale to 60
+                score += (product.rating || 0) * 8; // Rating bonus up to 40 (5*8=40)
+            } else if (product.rating > 0){ // If no keywords but has rating
+                score = (product.rating || 0) * 10; // Base on rating only
+            }
+
+
+            // Add specific boosts for some categories
+            if (product.category === "USBCables" && clusterName === "Charging Speed") {
+                if (textToAnalyze.includes("3a") || textToAnalyze.includes("60w") || textToAnalyze.includes("65w") || textToAnalyze.includes("fast charging")) score += 15;
+            }
+            if (product.category === "SmartTelevisions" && clusterName === "Picture Quality") {
+                if (textToAnalyze.includes("4k") || textToAnalyze.includes("uhd")) score += 15;
+                if (textToAnalyze.includes("hdr")) score += 10;
+            }
+
+
+            scores[clusterName] = Math.min(100, Math.max(0, Math.round(score)));
+        }
+        
+        // Ensure 'Value' score is present and somewhat realistic
+        if (!scores["Value"] && product.price > 0 && product.actual_price > 0 && product.actual_price > product.price) {
+            const discountFactor = (product.actual_price - product.price) / product.actual_price;
+            scores["Value"] = Math.min(100, Math.round(discountFactor * 80 + (product.rating || 0) * 4));
+        } else if (!scores["Value"]) {
+             scores["Value"] = Math.round((product.rating || 0) * 15);
+        }
+
+
+        if (Object.keys(scores).length === 0) { // Ultimate fallback
+            scores['Overall Quality'] = Math.round((product.rating || 0) * 20);
+            scores['Value Impression'] = Math.round(50 + (product.rating || 0) * 5);
+        }
+        return scores;
+    }
+
+    function extractKeyInsights(product) {
+        let insights = [];
+        if (product.about) {
+             insights = product.about.split('|')
+                               .map(s => s.trim().replace(/\[|\]/g, '')) // Remove brackets
+                               .filter(s => s.length > 15 && s.length < 100); // Filter by length
+        }
+        
+        if (insights.length < 3 && product.review_content_sample) {
+            const reviewSentences = product.review_content_sample.split(/[.,!?;]\s+/)
+                                      .map(s => s.trim())
+                                      .filter(s => s.length > 20 && s.length < 120);
+            insights = [...new Set([...insights, ...reviewSentences])]; // Combine and make unique
+        }
+
+        // Prioritize insights that mention keywords from high-scoring clusters
+        const sortedClusters = Object.entries(product.clusters || {}).sort((a,b) => b[1] - a[1]);
+        let finalInsights = [];
+        
+        for (const [clusterName, _] of sortedClusters) {
+            if (finalInsights.length >= 3) break;
+            const keywordsForCluster = (CLUSTER_KEYWORDS[product.category] || CLUSTER_KEYWORDS.Default)[clusterName] || [];
+            for (const insight of insights) {
+                if (finalInsights.length >= 3) break;
+                if (keywordsForCluster.some(kw => insight.toLowerCase().includes(kw.split(' ')[0])) && !finalInsights.includes(insight)) { // check first word of keyword
+                    finalInsights.push(insight);
+                }
+            }
+        }
+        // Fill up with any remaining insights if not enough found through clusters
+        if (finalInsights.length < 3) {
+            for (const insight of insights) {
+                if (finalInsights.length >= 3) break;
+                if (!finalInsights.includes(insight)) {
+                    finalInsights.push(insight);
+                }
             }
         }
 
-        // Animate KPI Counters
-        function animateCounters() {
-            const counters = document.querySelectorAll('.kpi-value');
+        return finalInsights.slice(0, 3).map(insight => insight.length > 70 ? insight.substring(0, 67) + "..." : insight);
+    }
+
+
+    async function initializeChatbot() {
+        addMessage("🚀 Initializing SmartChoice AI... Loading product data, please wait.", false);
+        showProcessingIndicator();
+        updateStage("Loading...");
+
+        try {
+            const response = await fetch(CSV_FILE_PATH);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch ${CSV_FILE_PATH}: ${response.statusText}`);
+            }
+            const csvText = await response.text();
+            const rawProducts = parseCSV(csvText);
+
+            if (rawProducts.length === 0) {
+                addMessage("⚠️ No products found in the CSV or failed to parse. Please check the file and its format.", false);
+                hideProcessingIndicator();
+                updateStage("Error");
+                document.getElementById('userInput').placeholder = "Error loading data. Check console.";
+                return;
+            }
+
+            PRODUCT_DATABASE = processProductData(rawProducts);
             
-            counters.forEach((counter, index) => {
-                counter.style.opacity = '0';
-                counter.style.transform = 'translateY(20px)';
-                
-                setTimeout(() => {
-                    counter.style.transition = 'all 0.8s ease-out';
-                    counter.style.opacity = '1';
-                    counter.style.transform = 'translateY(0)';
-                }, index * 200);
+            PRODUCT_DATABASE.forEach(p => {
+                p.clusters = getSimulatedClusterScores(p);
+                p.keyInsights = extractKeyInsights(p);
             });
+
+            ALL_CATEGORIES = [...new Set(PRODUCT_DATABASE.map(p => p.category))].filter(c => c && c !== "Uncategorized");
+            
+            hideProcessingIndicator();
+            addMessage(`✅ Successfully loaded and processed ${PRODUCT_DATABASE.length} products. I'm ready to help! What are you looking for today?`, false);
+            document.getElementById('userInput').disabled = false;
+            document.getElementById('sendBtn').disabled = false;
+            document.getElementById('userInput').placeholder = "Tell me what you're looking for...";
+            updateStage(CDJ_STAGES.AWARENESS);
+            updateSuggestions(); 
+        } catch (error) {
+            console.error("Error initializing chatbot:", error);
+            addMessage(`❌ Error loading product data: ${error.message}. Please ensure '${CSV_FILE_PATH}' is in the same directory and accessible. Check the browser console for more details.`, false);
+            hideProcessingIndicator();
+            updateStage("Error");
+            document.getElementById('userInput').placeholder = "Error loading data. Check console.";
+        }
+    }
+
+
+    // ───────────────────── CDJ Stage Update ─────────────────────
+    function updateStage(newStage) {
+      currentStage = newStage;
+      userContext.stage = newStage;
+      document.getElementById('cdjStage').textContent = newStage;
+    }
+
+    function determineProductCategory(query) {
+      const q = query.toLowerCase();
+      if (ALL_CATEGORIES.length > 0) {
+          // Prefer exact or near-exact matches from ALL_CATEGORIES
+          for (const cat of ALL_CATEGORIES) {
+              const catLower = cat.toLowerCase();
+              // Allow for pluralization and slight variations
+              if (q.includes(catLower) || q.includes(catLower.slice(0, -1))) { // e.g., "cable" for "cables"
+                  return cat;
+              }
+          }
+           // Try matching parts of the query to parts of category names
+          for (const cat of ALL_CATEGORIES) {
+              const catParts = cat.toLowerCase().replace(/usb/g, '').split(/(?=[A-Z])/).join(" ").split(" "); // "USBCables" -> ["cables"]
+              if (catParts.some(part => q.includes(part) && part.length > 3)) {
+                  return cat;
+              }
+          }
+      }
+      // Fallback keyword matching
+      if (q.includes('tv') || q.includes('television')) return 'SmartTelevisions';
+      if (q.includes('phone') || q.includes('smartphone')) return 'Smartphones'; // This might not be in your CSV, but good fallback
+      if (q.includes('earbuds') || q.includes('headphone')) return 'Wireless Earbuds'; // Similar fallback
+      if (q.includes('cable') || q.includes('charger')) return 'USBCables';
+      if (q.includes('adapter') || q.includes('dongle') || q.includes('wifi adapter')) return 'WirelessUSBAdapters';
+      if (q.includes('hdmi')) return 'HDMICables';
+
+      return null;
+    }
+
+    // ───────────────────── Generate Responses by Stage ─────────────────────
+    function generateAwarenessResponse(query) {
+      if (PRODUCT_DATABASE.length === 0) return "Product data is not loaded. Please refresh or check console for errors.";
+      
+      const categoryName = determineProductCategory(query);
+      userContext.productCategory = categoryName; // Set context even if null for trending
+
+      let productsToList;
+      let insightTitle;
+
+      if (categoryName) {
+        productsToList = PRODUCT_DATABASE.filter(p => p.category === categoryName);
+        insightTitle = `Product Discovery – ${categoryName}`;
+        
+        if (productsToList.length === 0) { // Broader search within full category string
+             productsToList = PRODUCT_DATABASE.filter(p => p.category_full.toLowerCase().includes(categoryName.toLowerCase().substring(0, Math.min(categoryName.length, 5))));
+        }
+        if (productsToList.length === 0) { 
+            addMessage(`I couldn't find products specifically for "${categoryName}". Showing general trending items.`, false);
+            return generateTrendingProducts();
+        }
+      } else { 
+        return generateTrendingProducts();
+      }
+
+      updateStage(CDJ_STAGES.CONSIDERATION);
+      // Sort by a popularity score (rating * log(reviews+1) to give weight to highly reviewed items)
+      productsToList.sort((a,b) => (b.rating * Math.log10(b.reviews + 1)) - (a.rating * Math.log10(a.reviews+1))); 
+      const topProduct = productsToList[0];
+
+      if (!topProduct) {
+          return `I don't have information on "${query}" in the loaded data. You can try: ${ALL_CATEGORIES.slice(0,3).join(', ')} or 'trending products'.`;
+      }
+
+      let response = `<div class="cdj-insight">
+        <div class="insight-header">
+          <span class="insight-icon">🎯</span>
+          <span class="insight-title">${insightTitle}</span>
+        </div>
+        <div class="insight-content">
+          I found ${productsToList.length} products in this category. Based on user reviews, here’s a top pick for you:
+        </div>
+      </div>`;
+
+      response += renderProductCard(topProduct, "Popular Choice");
+
+      response += `<br />Would you like to compare more options in ${categoryName}, or dive deeper into this one? 🔍`;
+      return response;
+    }
+
+    function generateConsiderationResponse(query) {
+      if (PRODUCT_DATABASE.length === 0) return "Product data is not loaded.";
+      if (!userContext.productCategory) {
+        // Try to infer category again if it's missing
+        const inferredCategory = determineProductCategory(query);
+        if (inferredCategory) {
+            userContext.productCategory = inferredCategory;
+        } else {
+            return "Which product category are you interested in comparing? Available: " + ALL_CATEGORIES.slice(0,5).join(', ') + (ALL_CATEGORIES.length > 5 ? "..." : "");
+        }
+      }
+
+      updateStage(CDJ_STAGES.EVALUATION);
+      let products = PRODUCT_DATABASE.filter(p => p.category === userContext.productCategory);
+      if (products.length === 0) { 
+          products = PRODUCT_DATABASE.filter(p => p.category_full.toLowerCase().includes(userContext.productCategory.toLowerCase().substring(0, Math.min(userContext.productCategory.length, 5))));
+      }
+      products.sort((a,b) => (b.rating * Math.log10(b.reviews+1)) - (a.rating * Math.log10(a.reviews+1)));
+      const topNProducts = products.slice(0, 3); 
+
+      if (topNProducts.length === 0) {
+          return `No products found for category "${userContext.productCategory}". You can try another category.`;
+      }
+
+      let response = `<div class="cdj-insight">
+        <div class="insight-header">
+          <span class="insight-icon">🔍</span>
+          <span class="insight-title">Comparing Top Options in ${userContext.productCategory}</span>
+        </div>
+        <div class="insight-content">
+          Here are ${topNProducts.length} leading products based on user reviews and data:
+        </div>
+      </div>`;
+
+      topNProducts.forEach((product, index) => {
+        response += renderProductCard(product, index === 0 ? "Highly Rated" : null);
+      });
+
+      response += `<br />What specific features are most important to you (e.g., 'durability for cables', 'picture quality for TVs', 'best value')? This helps me refine the analysis. ⚖️`;
+      return response;
+    }
+    
+    function renderProductCard(product, badgeText = null) {
+        if (!product) return "<div>Error: Product data missing for card.</div>";
+        // Ensure clusters exist and are sorted, pick top 3-4 for display
+        const topClusters = product.clusters ? Object.entries(product.clusters)
+            .sort(([, a], [, b]) => b - a) // Sort by score descending
+            .slice(0, 4) : [];
+
+        return `<div class="product-card">
+            ${product.img_link && product.img_link !== 'N/A' ? `<img src="${product.img_link}" alt="${product.name}" class="product-image" onerror="this.style.display='none'; this.onerror=null;">` : ''}
+            <div class="product-header">
+              <div class="product-name">${product.name || 'N/A'} ${badgeText ? `<span class="recommendation-badge">${badgeText}</span>` : ''}</div>
+              <div class="product-price">₹${product.price ? product.price.toLocaleString() : 'N/A'}</div>
+            </div>
+            <div class="product-rating">
+              <div class="stars">${'★'.repeat(Math.floor(product.rating || 0))}${(product.rating || 0) % 1 >= 0.5 ? '½' : ''}${'☆'.repeat(5 - Math.ceil(product.rating || 0))}</div>
+              <div class="rating-text">${product.rating || 0}/5 (${(product.reviews || 0).toLocaleString()} reviews)</div>
+            </div>
+            ${topClusters.length > 0 ? `
+            <div class="cluster-scores">
+                ${topClusters.map(([key, val]) => `
+                <div class="cluster-score">
+                    <div class="cluster-name">${key}</div>
+                    <div class="cluster-value">${val}/100</div>
+                    <div class="cluster-bar"><div class="cluster-fill" style="width: ${val}%"></div></div>
+                </div>`).join('')}
+            </div>` : '<p style="font-size:0.8rem; color:#666; margin: 10px 0;">Key feature scores are being compiled.</p>'}
+            ${(product.keyInsights && product.keyInsights.length > 0 && product.keyInsights[0]) ? `
+            <div style="font-size: 0.8rem; color: #555; margin-top: 8px; line-height:1.4;">
+                <strong>Key Insights:</strong>
+                <ul style="list-style-type: disc; margin-left: 20px; padding-left: 0;">${product.keyInsights.map(i => `<li>${i}</li>`).join('')}</ul>
+            </div>` : ''}
+            <div class="product-actions">
+                ${product.product_link && product.product_link !== 'N/A' ? `<button onclick="window.open('${product.product_link}', '_blank')">View Product</button>` : ''}
+                <button onclick="sendSuggestion('Tell me more about ${product.id}')">More Details</button>
+            </div>
+        </div>`;
+    }
+
+
+    function generateEvaluationResponse(query) {
+        if (PRODUCT_DATABASE.length === 0) return "Product data is not loaded.";
+        if (!userContext.productCategory) {
+            const inferredCategory = determineProductCategory(query);
+            if (inferredCategory) userContext.productCategory = inferredCategory;
+            else return "Please specify a product category for evaluation.";
         }
 
-        // Setup Professional Filters
-        function setupFilters() {
-            const filters = ['dateFilter', 'ratingFilter', 'categoryFilter', 'keywordFilter'];
-            
-            filters.forEach(filterId => {
-                const element = document.getElementById(filterId);
-                element.addEventListener('change', () => {
-                    showToast('Analysis filters updated');
-                });
-            });
+        updateStage(CDJ_STAGES.DECISION);
+        let products = PRODUCT_DATABASE.filter(p => p.category === userContext.productCategory);
+         if (products.length === 0) { 
+            products = PRODUCT_DATABASE.filter(p => p.category_full.toLowerCase().includes(userContext.productCategory.toLowerCase().substring(0, Math.min(userContext.productCategory.length,5))));
+        }
+        if (products.length === 0) return `No products to evaluate for ${userContext.productCategory}.`;
+
+        products.sort((a,b) => (b.rating * Math.log10(b.reviews+1)) - (a.rating * Math.log10(a.reviews+1)));
+        const topNProducts = products.slice(0, Math.min(5, products.length));
+
+        let priorityCluster = null;
+        const q = query.toLowerCase();
+        
+        if (topNProducts.length > 0 && topNProducts[0].clusters) {
+            const allClusterNames = Object.keys(topNProducts[0].clusters);
+            for (const clusterKey of allClusterNames) {
+                if (q.includes(clusterKey.toLowerCase().replace(/ /g, ''))) {
+                    priorityCluster = clusterKey;
+                    break;
+                }
+            }
+        }
+        // Generic keyword fallback
+        if (!priorityCluster) {
+            if (q.includes('camera') || q.includes('photo')) priorityCluster = 'Picture Quality';
+            else if (q.includes('battery') || q.includes('power')) priorityCluster = 'Battery Life'; 
+            else if (q.includes('sound') || q.includes('audio')) priorityCluster = 'Sound Quality';
+            else if (q.includes('price') || q.includes('value') || q.includes('budget')) priorityCluster = 'Value';
+            else if (q.includes('performance') || q.includes('speed')) priorityCluster = 'Performance';
+            else if (q.includes('durable') || q.includes('build')) priorityCluster = 'Durability';
         }
 
-        // Initialize Dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            loadTheme();
-            initializeAllCharts();
-            populateReviewsTable();
-            animateCounters();
-            setupFilters();
-            
-            // Staggered card animations
-            const cards = document.querySelectorAll('.dashboard-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(30px)';
-                
-                setTimeout(() => {
-                    card.style.transition = 'all 0.6s ease-out';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 150);
+
+        let response = `<div class="cdj-insight">
+            <div class="insight-header">
+            <span class="insight-icon">⚖️</span>
+            <span class="insight-title">Detailed Evaluation for ${userContext.productCategory}</span>
+            </div>
+            <div class="insight-content">
+            ${priorityCluster ? `Focusing on <strong>${priorityCluster}</strong>, here's a deeper look:` : "Here's a comprehensive evaluation:"}
+            </div>
+        </div>`;
+
+        if (priorityCluster && topNProducts.length > 0) {
+            const sortedByPriority = [...topNProducts].sort((a, b) => (b.clusters[priorityCluster] || 0) - (a.clusters[priorityCluster] || 0));
+            const bestForPriority = sortedByPriority[0];
+            if (bestForPriority && bestForPriority.clusters && bestForPriority.clusters[priorityCluster] !== undefined) {
+                 response += renderProductCard(bestForPriority, `Excels in ${priorityCluster}`);
+            } else if (bestForPriority) {
+                 response += renderProductCard(bestForPriority, `Strong Overall`); 
+                 response += `<p style="font-size:0.85rem; margin-top:5px;">Note: Specific score for '${priorityCluster}' wasn't available for all products for direct ranking on this aspect, but this is a strong contender.</p>`;
+            }
+        }
+
+
+        if (topNProducts.length > 0) {
+            const tableHeaders = ['Product', 'Rating', 'Price (₹)'];
+            let priorityClusterExistsInSome = false;
+            if (priorityCluster) {
+                 priorityClusterExistsInSome = topNProducts.some(p => p.clusters && p.clusters[priorityCluster] !== undefined);
+                 if (priorityClusterExistsInSome) tableHeaders.push(`${priorityCluster} Score`);
+            }
+            if (tableHeaders.length === 3) tableHeaders.push('Top Strength'); // Fallback if priority cluster not found
+
+
+            response += `<div class="comparison-table">
+            <table>
+                <thead>
+                <tr>
+                    ${tableHeaders.map(th => `<th>${th}</th>`).join('')}
+                </tr>
+                </thead>
+                <tbody>
+                ${topNProducts.map(product => {
+                    let featureDisplay = 'N/A';
+                    if (priorityClusterExistsInSome && product.clusters && product.clusters[priorityCluster] !== undefined) {
+                        featureDisplay = `${product.clusters[priorityCluster]}/100`;
+                    } else if (product.clusters && Object.keys(product.clusters).length > 0) {
+                        const topClusterEntry = Object.entries(product.clusters).reduce((a, b) => (b[1] > a[1] ? b : a));
+                        featureDisplay = `${topClusterEntry[0]} (${topClusterEntry[1]}/100)`;
+                    }
+                    const cells = [
+                        `<td>${product.name}</td>`,
+                        `<td>${product.rating}/5</td>`,
+                        `<td>${product.price.toLocaleString()}</td>`,
+                        `<td>${featureDisplay}</td>`
+                    ];
+                    return `<tr>${cells.slice(0, tableHeaders.length).join('')}</tr>`;
+                }).join('')}
+                </tbody>
+            </table>
+            </div>`;
+        }
+
+        response += `<br />Based on this, are you ready for a final recommendation, or need to explore another angle? ✅`;
+        return response;
+    }
+
+    function generateDecisionResponse(query) {
+        if (PRODUCT_DATABASE.length === 0) return "Product data is not loaded.";
+        if (!userContext.productCategory) {
+            const inferredCategory = determineProductCategory(query);
+            if (inferredCategory) userContext.productCategory = inferredCategory;
+            else return "Please specify a product category to get a recommendation.";
+        }
+
+        updateStage(CDJ_STAGES.POST_PURCHASE);
+        let products = PRODUCT_DATABASE.filter(p => p.category === userContext.productCategory);
+        if (products.length === 0) { 
+            products = PRODUCT_DATABASE.filter(p => p.category_full.toLowerCase().includes(userContext.productCategory.toLowerCase().substring(0, Math.min(userContext.productCategory.length,5))));
+        }
+
+        if (products.length === 0) return `No products to make a decision on for ${userContext.productCategory}.`;
+
+        // Enhanced decision logic:
+        // Prioritize user-mentioned aspects if any, otherwise rating*log(reviews)
+        let topProduct;
+        const q = query.toLowerCase();
+        let decisionBasis = "overall user satisfaction (rating and review volume)";
+
+        let priorityClusterName = null;
+         if (products[0] && products[0].clusters) {
+            const allClusterNames = Object.keys(products[0].clusters);
+            for (const clusterKey of allClusterNames) {
+                if (q.includes(clusterKey.toLowerCase().replace(/ /g, ''))) {
+                    priorityClusterName = clusterKey;
+                    break;
+                }
+            }
+        }
+
+        if (priorityClusterName) {
+            products.sort((a, b) => (b.clusters[priorityClusterName] || 0) - (a.clusters[priorityClusterName] || 0));
+            decisionBasis = `strong performance in <strong>${priorityClusterName}</strong>`;
+        } else {
+            products.sort((a, b) => {
+                if (b.rating !== a.rating) return b.rating - a.rating;
+                return Math.log10(b.reviews + 1) - Math.log10(a.reviews + 1);
             });
-            
-            // Welcome message
-            setTimeout(() => {
-                showToast('McKinsey Analytics Dashboard initialized - Team Wavy');
-            }, 1000);
+        }
+        topProduct = products[0];
+        userContext.lastRecommendedProduct = topProduct;
+
+
+        let response = `<div class="cdj-insight">
+            <div class="insight-header">
+            <span class="insight-icon">✅</span>
+            <span class="insight-title">Final Recommendation for ${userContext.productCategory}</span>
+            </div>
+            <div class="insight-content">
+            Considering ${decisionBasis}, my top recommendation is:
+            </div>
+        </div>`;
+
+        response += `<div class="product-card" style="border: 3px solid #10b981; background: linear-gradient(145deg, #ecfdf5 0%, #f0fdf4 100%); position: relative;">
+            <div style="position: absolute; top: -12px; right: 16px; background: #10b981; color: white; padding: 6px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">
+            🏆 TOP CHOICE
+            </div>
+            ${topProduct.img_link && topProduct.img_link !== 'N/A' ? `<img src="${topProduct.img_link}" alt="${topProduct.name}" class="product-image" onerror="this.style.display='none';this.onerror=null;">` : ''}
+            <div class="product-header">
+            <div class="product-name">${topProduct.name}</div>
+            <div class="product-price">₹${topProduct.price.toLocaleString()}</div>
+            </div>
+            <div class="product-rating">
+            <div class="stars">${'★'.repeat(Math.floor(topProduct.rating))}${(topProduct.rating) % 1 >= 0.5 ? '½' : ''}${'☆'.repeat(5 - Math.ceil(topProduct.rating))}</div>
+            <div class="rating-text">${topProduct.rating}/5 (${topProduct.reviews.toLocaleString()} reviews)</div>
+            </div>
+            <div class="cluster-scores">
+            ${Object.entries(topProduct.clusters).slice(0,6).map(([key, val]) => `
+                <div class="cluster-score">
+                <div class="cluster-name">${key}</div>
+                <div class="cluster-value">${val}/100</div>
+                <div class="cluster-bar"><div class="cluster-fill" style="width: ${val}%"></div></div>
+                </div>`).join('')}
+            </div>
+            ${(topProduct.keyInsights && topProduct.keyInsights.length > 0 && topProduct.keyInsights[0]) ? `
+            <div style="background: #dcfce7; padding: 16px; border-radius: 12px; margin: 16px 0;">
+            <div style="font-weight: 700; color: #166534; margin-bottom: 8px;">🎯 Why This Is Your Best Choice:</div>
+            <ul style="margin: 0; padding-left: 20px; color: #166534; font-size:0.85rem; list-style-type: disc;">
+                ${topProduct.keyInsights.map(ins => `<li>${ins}</li>`).join('')}
+            </ul>
+            </div>` : ''}
+             <div class="product-actions">
+                ${topProduct.product_link && topProduct.product_link !== 'N/A' ? `<button onclick="window.open('${topProduct.product_link}', '_blank')">View on Store</button>` : ''}
+            </div>
+        </div>`;
+         const confidenceScore = Math.min(98, Math.round(topProduct.rating * 10 + Math.log10(topProduct.reviews +1) * 10 + (priorityClusterName && topProduct.clusters[priorityClusterName] ? topProduct.clusters[priorityClusterName]/5 : 5 ) ));
+        response += `<div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 12px; padding: 16px; margin: 16px 0;">
+            <div style="font-weight: 700; color: #0369a1; margin-bottom: 8px;">📊 Decision Confidence Score: ${confidenceScore}/100</div>
+            <div style="font-size: 0.875rem; color: #0c4a6e;">
+            This recommendation is based on simulated cluster analysis of product information and review snippets, considering factors like ${decisionBasis}.
+            </div>
+        </div>`;
+
+        response += `<br />🎉 Hope this helps! I'm here for any post-purchase questions or if you'd like to start a new search.`;
+        return response;
+    }
+
+    function generatePostPurchaseResponse(query) {
+      const q = query.toLowerCase();
+      const product = userContext.lastRecommendedProduct;
+      const productName = product ? product.name : "your product";
+      
+      let response = `<div class="cdj-insight">
+        <div class="insight-header">
+          <span class="insight-icon">💬</span>
+          <span class="insight-title">Post-Purchase Support for ${productName}</span>
+        </div>
+        <div class="insight-content">
+          I'm here to help you get the most out of your purchase!
+        </div>
+      </div>`;
+
+      let commonTips = "• Always refer to the manufacturer's official website for the most up-to-date FAQs, manuals, and support channels.\n• Register your product for warranty if applicable.";
+      if(product && (product.about || product.review_content_sample)) {
+          const combinedText = (product.about + " " + product.review_content_sample).toLowerCase();
+          if (combinedText.includes("setup") || combinedText.includes("install")) commonTips += "\n• Based on general feedback, ensure you follow all steps in the guide for setup.";
+          if (combinedText.includes("update") || combinedText.includes("firmware")) commonTips += "\n• Check for software/firmware updates; these often improve performance or fix issues.";
+          if (combinedText.includes("battery") && (product.category === "SmartTelevisions" || product.category.includes("Cable"))) {} // No battery tips for these
+          else if (combinedText.includes("battery")) commonTips += "\n• For battery-powered devices, initial full charge and periodic calibration (if applicable) can help longevity."
+      }
+
+
+      if (q.includes('setup') || q.includes('how to use')) {
+        response += `<div style="background: #f0f9ff; border-radius: 12px; padding: 16px; margin: 12px 0;">
+          <div style="font-weight: 700; color: #0369a1; margin-bottom: 8px;">🛠️ Setup & Usage Tips</div>
+          <div style="font-size: 0.875rem; color: #0c4a6e; line-height: 1.6; white-space: pre-line;">
+            General tips for ${productName}:
+            ${commonTips}
+            ${product && product.product_link ? `\n• <a href="${product.product_link}" target="_blank">View Product Page</a> for official resources.` : ''}
+          </div>
+        </div>`;
+      } else if (q.includes('problem') || q.includes('issue') || q.includes('not working')) {
+        response += `<div style="background: #fef3c7; border-radius: 12px; padding: 16px; margin: 12px 0;">
+          <div style="font-weight: 700; color: #92400e; margin-bottom: 8px;">🔧 Troubleshooting Support</div>
+          <div style="font-size: 0.875rem; color: #78350f; line-height: 1.6; white-space: pre-line;">
+            Common troubleshooting steps for ${productName}:
+            • Try restarting the device.
+            • Ensure all connections are secure (if applicable).
+            ${commonTips.includes("update") ? "• Double-check for software updates." : ""}
+            • If the problem persists, consult the product manual or contact manufacturer support directly.
+            ${product && product.product_link ? `\n• Check the <a href="${product.product_link}" target="_blank">product page</a> for support links.` : ''}
+          </div>
+        </div>`;
+      } else if (q.includes('review') || q.includes('feedback')) {
+        response += `<div style="background: #ecfdf5; border-radius: 12px; padding: 16px; margin: 12px 0;">
+          <div style="font-weight: 700; color: #166534; margin-bottom: 8px;">⭐ Share Your Experience</div>
+          <div style="font-size: 0.875rem; color: #166534; line-height: 1.6;">
+            Your feedback on ${productName} is valuable! If you purchased through a retailer, consider leaving a review there. This helps other shoppers and provides feedback to the manufacturer.
+          </div>
+        </div>`;
+      } else {
+        response += `<div style="background: #f8fafc; border-radius: 12px; padding: 16px; margin: 12px 0;">
+          <div style="font-weight: 700; color: #374151; margin-bottom: 8px;">🤝 How Can I Help with ${productName}?</div>
+          <div style="font-size: 0.875rem; color: #4b5563; line-height: 1.6; white-space: pre-line;">
+            I can try to offer general advice based on the product information I have. For specific issues, manufacturer support is usually best.
+            ${commonTips}
+          </div>
+        </div>`;
+      }
+      return response;
+    }
+    
+    function generateTrendingProducts() {
+        if (PRODUCT_DATABASE.length === 0) return "Product data is not loaded.";
+        updateStage(CDJ_STAGES.AWARENESS); 
+
+        let response = `<div class="cdj-insight">
+            <div class="insight-header">
+            <span class="insight-icon">🔥</span>
+            <span class="insight-title">Trending Products Analysis</span>
+            </div>
+            <div class="insight-content">
+            Based on popularity (reviews and rating), here are some top products from the loaded data:
+            </div>
+        </div>`;
+
+        const trending = PRODUCT_DATABASE
+                            .filter(p => p.reviews > 500) // Min reviews to be "trending" - adjust as needed
+                            .sort((a, b) => (b.rating * Math.log10(b.reviews + 1)) - (a.rating * Math.log10(a.reviews+1)))
+                            .slice(0, 5); 
+
+        if (trending.length === 0) {
+            return "Not enough highly-reviewed products in the data to determine specific trends. You can ask about categories like: " + ALL_CATEGORIES.slice(0,3).join(', ');
+        }
+        
+        trending.forEach(product => {
+            response += renderProductCard(product, `Trending in ${product.category}`);
         });
-    </script>
+
+        response += `<br />Interested in any of these categories or a specific product? Let me know! 🔍 You can also ask "Show me ${ALL_CATEGORIES[0]}" for example.`;
+        return response;
+    }
+
+
+    // ───────────────────── Smart Response Router ─────────────────────
+    function generateSmartResponse(userQuery) {
+      if (PRODUCT_DATABASE.length === 0) {
+          return "I'm still waiting for product data to be loaded. Please ensure 'mckinsey.csv' is present and the page has loaded correctly.";
+      }
+      const q = userQuery.toLowerCase();
+
+      // Handle direct product ID query
+      if (q.startsWith("tell me more about ") || q.startsWith("details for ")) {
+          const idPattern = /[A-Z0-9]{10}/; // Basic pattern for Amazon-like product IDs
+          const match = q.match(idPattern);
+          if (match) {
+            const productId = match[0];
+            const product = PRODUCT_DATABASE.find(p => p.id === productId);
+            if (product) {
+                userContext.productCategory = product.category; 
+                userContext.lastRecommendedProduct = product; // For post-purchase context too
+                updateStage(CDJ_STAGES.EVALUATION); // Good stage for details
+                let detailResponse = `<div class="cdj-insight">
+                    <div class="insight-header">
+                    <span class="insight-icon">ℹ️</span>
+                    <span class="insight-title">Details for ${product.name}</span>
+                    </div>
+                    <div class="insight-content">
+                    Here's more information about this product:
+                    </div>
+                </div>`;
+                detailResponse += renderProductCard(product);
+                detailResponse += `<div style="margin-top:10px; font-size:0.9rem; line-height:1.5;"><strong>About Product:</strong><br/>${(product.about || "Not available").replace(/\|/g, "<br/>• ").replace(/^• /,'')}</div>`;
+                if (product.review_content_sample && product.review_content_sample !== "N/A") {
+                    const reviewSentences = product.review_content_sample.split(/[.,!?]\s+/).filter(s => s.length > 10);
+                    if (reviewSentences.length > 0) {
+                         detailResponse += `<div style="margin-top:10px; font-size:0.9rem; line-height:1.5;"><strong>User Review Insights:</strong><br/>• <em>${reviewSentences.slice(0,2).join("... <br/>• ")}...</em></div>`;
+                    }
+                }
+                detailResponse += `<br/>What else would you like to know? Or are you ready to compare it with other ${product.category}?`;
+                return detailResponse;
+            } else {
+                addMessage(`Sorry, I couldn't find a product with ID "${productId}" in the loaded data.`, false);
+            }
+          }
+      }
+      
+      // Reset context keywords
+      if (q.includes('start over') || q.includes('new search') || q.includes('main menu') || q.includes('show categories')) {
+          userContext.productCategory = null;
+          updateStage(CDJ_STAGES.AWARENESS);
+          return generateAwarenessResponse("show trending products"); // Or a generic welcome
+      }
+
+
+      if (currentStage === CDJ_STAGES.AWARENESS || (!userContext.productCategory && !q.includes("compare") && !q.includes("analyze") && !q.includes("recommend"))) {
+        return generateAwarenessResponse(userQuery);
+      } else if (currentStage === CDJ_STAGES.CONSIDERATION || q.includes('compare') || q.includes('options') || q.includes('alternatives')) {
+        // If user asks to compare but no category yet, try to infer
+        if (!userContext.productCategory) userContext.productCategory = determineProductCategory(q);
+        return generateConsiderationResponse(userQuery);
+      } else if (currentStage === CDJ_STAGES.EVALUATION || q.includes('analysis') || q.includes('detail') || q.includes('specific feature') || q.includes('focus on')) {
+        if (!userContext.productCategory) userContext.productCategory = determineProductCategory(q);
+        return generateEvaluationResponse(userQuery);
+      } else if (currentStage === CDJ_STAGES.DECISION || q.includes('recommend') || q.includes('best for me') || q.includes('choose') || q.includes('final decision')) {
+        if (!userContext.productCategory) userContext.productCategory = determineProductCategory(q);
+        return generateDecisionResponse(userQuery);
+      } else if (currentStage === CDJ_STAGES.POST_PURCHASE || q.includes('help') || q.includes('support') || q.includes('problem') || q.includes('review') || q.includes('bought')) {
+        return generatePostPurchaseResponse(userQuery);
+      } else {
+        // Fallback: try awareness if nothing else fits well
+        addMessage("Hmm, I'm not sure how to process that. Let's try exploring some products.", false);
+        return generateAwarenessResponse(userQuery);
+      }
+    }
+
+    // ───────────────────── UI Functions ─────────────────────
+    function addMessage(content, isUser = false) {
+      const messagesContainer = document.getElementById('chatMessages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'message-content';
+      contentDiv.innerHTML = content;
+
+      messageDiv.appendChild(contentDiv);
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+      const indicator = document.getElementById('typingIndicator');
+      indicator.style.display = 'block';
+      indicator.setAttribute('aria-hidden', 'false');
+      document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+    }
+
+    function hideTypingIndicator() {
+      document.getElementById('typingIndicator').style.display = 'none';
+      document.getElementById('typingIndicator').setAttribute('aria-hidden', 'true');
+    }
+
+    function showProcessingIndicator() {
+      document.getElementById('processingIndicator').style.display = 'flex'; // or 'block'
+    }
+
+    function hideProcessingIndicator() {
+      document.getElementById('processingIndicator').style.display = 'none';
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('userInput');
+      const message = input.value.trim();
+      if (!message || input.disabled) return;
+
+      addMessage(message, true);
+      input.value = '';
+      input.focus();
+
+      showTypingIndicator();
+      // No global processing indicator here, only for CSV load or very long tasks
+
+      setTimeout(() => { 
+        hideTypingIndicator();
+        const response = generateSmartResponse(message);
+        addMessage(response);
+        updateSuggestions();
+      }, 600 + Math.random() * 600); // Simulate some processing time
+    }
+
+    function sendSuggestion(suggestion) {
+      document.getElementById('userInput').value = suggestion;
+      sendMessage();
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter' && !document.getElementById('userInput').disabled) {
+        sendMessage();
+      }
+    }
+
+    function updateSuggestions() {
+        const suggestionsContainer = document.getElementById('quickSuggestions');
+        if (PRODUCT_DATABASE.length === 0) {
+            suggestionsContainer.innerHTML = `<button class="suggestion-btn" disabled>Waiting for data...</button>`;
+            return;
+        }
+
+        let suggestions = [];
+        const commonCategoriesShort = ALL_CATEGORIES
+            .map(c => c.replace('USBAdapters', ' Adapters').replace('Televisions', ' TVs').replace('USBCables', ' Cables'))
+            .filter((value, index, self) => self.indexOf(value) === index) // Unique
+            .slice(0, 3);
+
+        switch (currentStage) {
+            case CDJ_STAGES.AWARENESS:
+            case "Loading...": // Also handle initial loading state
+            case "Error":
+                suggestions = [
+                    ...commonCategoriesShort.map(c => `Find ${c}`),
+                    'Show trending products'
+                ].filter(s => s); // Remove undefined if commonCategoriesShort is empty
+                 if (suggestions.length === 0 && ALL_CATEGORIES.length > 0) { // Fallback if mapped names are empty
+                    suggestions = ALL_CATEGORIES.slice(0,3).map(c => `Find ${c}`);
+                    if (suggestions.length < 3) suggestions.push('Show trending products');
+                } else if (suggestions.length === 0) {
+                    suggestions = ["I need a cable", "Show me TVs", "What's trending?"]
+                }
+                break;
+            case CDJ_STAGES.CONSIDERATION:
+                 suggestions = [
+                    `Analyze ${userContext.productCategory || 'these products'}`,
+                    'Which has best rating?',
+                ];
+                if (userContext.productCategory && (CLUSTER_KEYWORDS[userContext.productCategory] || CLUSTER_KEYWORDS.Default)) {
+                    const clusters = CLUSTER_KEYWORDS[userContext.productCategory] || CLUSTER_KEYWORDS.Default;
+                    const sampleCluster = Object.keys(clusters)[0];
+                    if (sampleCluster) suggestions.push(`Focus on ${sampleCluster.replace('_', ' ')}`);
+                    else suggestions.push('Focus on value');
+                } else {
+                    suggestions.push('Focus on value');
+                }
+                break;
+            case CDJ_STAGES.EVALUATION:
+                suggestions = [
+                    'Give final recommendation',
+                ];
+                 if (userContext.productCategory && (CLUSTER_KEYWORDS[userContext.productCategory] || CLUSTER_KEYWORDS.Default)) {
+                    const clusters = CLUSTER_KEYWORDS[userContext.productCategory] || CLUSTER_KEYWORDS.Default;
+                    Object.keys(clusters).slice(0,2).forEach(cl => {
+                        suggestions.push(`Best for ${cl.replace('_', ' ')}?`);
+                    });
+                } else {
+                     suggestions.push('Best for performance?');
+                     suggestions.push('Best value?');
+                }
+                break;
+            case CDJ_STAGES.DECISION:
+                suggestions = [
+                    'Help with setup for the recommended product',
+                    'Any common issues to look out for?',
+                ];
+                break;
+            case CDJ_STAGES.POST_PURCHASE:
+                suggestions = ['How to use its features?', 'Troubleshooting help', 'Leave feedback on my purchase'];
+                break;
+        }
+        
+        if (currentStage !== CDJ_STAGES.AWARENESS && currentStage !== "Loading..." && currentStage !== "Error") {
+            suggestions.push("Start new search");
+        }
+
+
+        suggestionsContainer.innerHTML = suggestions.slice(0,4) 
+            .map(s => {
+                let actionQuery = s;
+                let buttonText = s;
+                if (s === "Start new search") {
+                    actionQuery = "Show me trending products"; 
+                    buttonText = "Start New Search 🔄";
+                }
+                
+                return `<button class="suggestion-btn" onclick="sendSuggestion('${actionQuery.replace(/'/g, "\\'")}')">${buttonText}</button>`;
+            })
+            .join('');
+    }
+
+
+    // ───────────────────── Initialization ─────────────────────
+    window.onload = function () {
+      document.getElementById('userInput').focus();
+      initializeChatbot(); // Auto-load CSV
+      updateSuggestions(); // Initial suggestions
+    };
+  </script>
 </body>
 </html>
